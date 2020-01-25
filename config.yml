@@ -1,0 +1,13 @@
+version: '1.0'
+
+cms:
+    type: GraphCMS
+    host: API_URL
+    private-key: "your key"
+
+backups:
+    schema-path: ./backups/schema
+    content-path: ./backups/content
+    schemas:
+        - Author
+        - Blog
