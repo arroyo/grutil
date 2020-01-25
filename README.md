@@ -7,3 +7,8 @@ Headless CMS CLI
 ### Envars
 
 API_URL
+
+## Packages
+
+go get github.com/spf13/viper
+
