@@ -13,11 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package cmd
 
 import (
+	"os"
 	"fmt"
-
+	"log"
+	"strings"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
 	"github.com/spf13/cobra"
 )
 
@@ -48,4 +54,36 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// downloadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	var url string = os.Getenv("API_URL")
+	var requestBody string = `{"query":"query ($id: ID) {\n  blog(where: {id: $id}) {\n    status\n    updatedAt\n    createdAt\n    id\n    title\n    shortDescription\n    body\n    gallery {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    featuredImage {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    catgeory\n    metaDescription\n    metaKeywords\n    tags\n    slug\n    displayDate\n    author {\n      id\n    }\n  }\n}\n","variables":{"id":"ck5be29q8ogyf099618vjf0xp"}}`
+	// var requestBody string = "{query}"
+	bodyIoReader := strings.NewReader(requestBody)
+
+	req, err := http.NewRequest("GET", url, bodyIoReader)
+	if err != nil {
+		log.Fatal("Error reading request. ", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(string(body))
+
+	// Unserialize
+	var bodyJson interface{}
+	err = json.Unmarshal([]byte(body), &bodyJson)
+	log.Println(bodyJson)
 }
