@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 John Arroyo
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,19 +19,19 @@ package main
 import (
 	"cmsutil/cmd"
 	"cmsutil/internal"
-  "log"
-  "fmt"
+	"fmt"
+	"log"
 )
 
 func main() {
-	configuration, err := config.InitViper()
+	configuration, err := config.Load()
 	if err != nil {
 		fmt.Println("Error loading config file")
 		log.Fatalln(err)
 	}
 
+  fmt.Println(configuration)
   fmt.Println("\n")
-	fmt.Println(configuration)
-	
+
 	cmd.Execute()
 }

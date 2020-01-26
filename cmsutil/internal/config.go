@@ -1,44 +1,40 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"fmt"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	version string
-	cms struct {
-		provider   string
-		host       string
-		privateKey string
+	Version string
+	Cms     struct {
+		Provider   string
+		Host       string
+		PrivateKey string
 	}
-	backups struct {
-		schemaPath  string
-		contentPath string
-		schemas     []string
+	Backups struct {
+		SchemaPath  string
+		ContentPath string
+		Schemas     []string
 	}
+	API_URL string
+	API_KEY string
 }
 
-func InitViper() (Config, error) {
+func Load() (Config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath("../")
 	viper.AutomaticEnv()
+	viper.SetEnvPrefix("CMSUTIL")
 
 	err := viper.ReadInConfig()
 	if err != nil {
 		return Config{}, err
 	}
-	viper.SetDefault("schemaPath", "./backups/schema")
-	viper.SetDefault("contentPath", "./backups/content")
 
-	testvar := viper.Get("version")
-	fmt.Println(testvar)
-	testvar = viper.Get("cms")
-	fmt.Println(testvar)
-	testvar = viper.Get("backups")
-	fmt.Println(testvar)
-	testvar = viper.Get("API_URL")
-	fmt.Println(testvar)
+	viper.SetDefault("backups.schemapath", "../backups/schema")
+	viper.SetDefault("backups.contentpath", "../backups/content")
+	viper.Set("cms.host", "set override")
 
 	var configuration Config
 	err = viper.Unmarshal(&configuration)

@@ -2,14 +2,13 @@ version: '1.0'
 
 cms:
     provider: GraphCMS
-    host: API_URL
-    privateKey: "your key"
 
 backups:
-    schemaPath: ./backups/schema
-    contentPath: ./backups/content
+    contentPath: ../backups/content
+    schemaPath: ../backups/schema
     schemas:
         - Author
         - Blog
 
-API_URL: "Booyah"
+API_URL: "Set your CMS API URL here or use envar CMSUTIL_API_URL on host"
+API_KEY: "Set your CMS API key here or use envar CMSUTIL_API_KEY on host"

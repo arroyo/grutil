@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 John Arroyo
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func download() { 
+func download() {
 	var url string = os.Getenv("API_URL")
 	var requestBody string = `{"query":"query ($id: ID) {\n  blog(where: {id: $id}) {\n    status\n    updatedAt\n    createdAt\n    id\n    title\n    shortDescription\n    body\n    gallery {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    featuredImage {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    catgeory\n    metaDescription\n    metaKeywords\n    tags\n    slug\n    displayDate\n    author {\n      id\n    }\n  }\n}\n","variables":{"id":"ck5be29q8ogyf099618vjf0xp"}}`
 	bodyIoReader := strings.NewReader(requestBody)
