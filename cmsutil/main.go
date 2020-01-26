@@ -19,18 +19,19 @@ package main
 import (
 	"cmsutil/cmd"
 	"cmsutil/internal"
-	"log"
+  "log"
+  "fmt"
 )
 
 func main() {
-	constants, err := config.InitViper()
+	configuration, err := config.InitViper()
 	if err != nil {
-		log.Println("Error loading config file")
+		fmt.Println("Error loading config file")
 		log.Fatalln(err)
 	}
 
-	log.Println(constants)
-	log.Println("\n")
-
+  fmt.Println("\n")
+	fmt.Println(configuration)
+	
 	cmd.Execute()
 }

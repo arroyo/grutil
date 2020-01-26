@@ -1,7 +1,7 @@
 version: '1.0'
 
 cms:
-    type: GraphCMS
+    provider: GraphCMS
     host: API_URL
     privateKey: "your key"
 
@@ -11,3 +11,5 @@ backups:
     schemas:
         - Author
         - Blog
+
+API_URL: "Booyah"
