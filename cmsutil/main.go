@@ -13,10 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package main
 
-import "cmsutil/cmd"
+import (
+	"cmsutil/cmd"
+	"cmsutil/internal"
+	"log"
+)
 
 func main() {
-  cmd.Execute()
+	constants, err := config.InitViper()
+	if err != nil {
+		log.Println("Error loading config file")
+		log.Fatalln(err)
+	}
+
+	log.Println(constants)
+	log.Println("\n")
+
+	cmd.Execute()
 }
