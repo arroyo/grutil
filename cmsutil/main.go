@@ -18,20 +18,8 @@ package main
 
 import (
 	"cmsutil/cmd"
-	"cmsutil/internal"
-	"fmt"
-	"log"
 )
 
 func main() {
-	configuration, err := config.Load()
-	if err != nil {
-		fmt.Println("Error loading config file")
-		log.Fatalln(err)
-	}
-
-  fmt.Println(configuration)
-  fmt.Println("\n")
-
 	cmd.Execute()
 }

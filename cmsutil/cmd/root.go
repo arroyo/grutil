@@ -18,10 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"github.com/spf13/cobra"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
+	"os"
 )
 
 var cfgFile string
@@ -35,6 +36,22 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
+}
+
+type Config struct {
+	Version string
+	Cms     struct {
+		Provider   string
+		Host       string
+		PrivateKey string
+	}
+	Backups struct {
+		SchemaPath  string
+		ContentPath string
+		Schemas     []string
+	}
+	API_URL string
+	API_KEY string
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -53,7 +70,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.helloworld.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmsutil.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -62,26 +79,41 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	// Find home directory.
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
 		// Search config in home directory with name ".helloworld" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".helloworld")
+		viper.AddConfigPath(home + "/.cmsutil")
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
+	viper.SetEnvPrefix("CMSUTIL")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	viper.SetDefault("backups.schemapath", home+"/.cmsutil/backups/schema")
+	viper.SetDefault("backups.contentpath", home+"/.cmsutil/backups/content")
+	viper.Set("cms.host", "set override in code")
+
+	var configuration Config
+	err = viper.Unmarshal(&configuration)
+	if err != nil {
+		fmt.Printf("Unable to decode into struct, %v", err)
+		log.Fatalln(err)
+	}
+
+	fmt.Println(configuration)
+	fmt.Println("\n")
 }
