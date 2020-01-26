@@ -17,14 +17,14 @@ limitations under the License.
 package cmd
 
 import (
-	"os"
-	"fmt"
-	"log"
-	"strings"
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 )
 
 // downloadCmd represents the download command
@@ -67,13 +67,13 @@ func init() {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
