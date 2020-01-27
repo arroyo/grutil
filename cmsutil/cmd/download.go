@@ -44,19 +44,29 @@ to quickly create a Cobra application.`,
 }
 
 func download() {
-	url := fmt.Sprintf("%v", viper.Get("API_URL"))
-	var requestBody string = `{"query":"query ($id: ID) {\n  blog(where: {id: $id}) {\n    status\n    updatedAt\n    createdAt\n    id\n    title\n    shortDescription\n    body\n    gallery {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    featuredImage {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    catgeory\n    metaDescription\n    metaKeywords\n    tags\n    slug\n    displayDate\n    author {\n      id\n    }\n  }\n}\n","variables":{"id":"ck5be29q8ogyf099618vjf0xp"}}`
+	url := fmt.Sprintf("%v/export", viper.Get("API_URL"))
+	var requestBody string = `{
+		"fileType": "nodes",
+		"cursor": {
+		  "table": 0,
+		  "row": 0,
+		  "field": 0,
+		  "array": 0
+		}
+	  }`
 	bodyIoReader := strings.NewReader(requestBody)
 
-	req, err := http.NewRequest("GET", url, bodyIoReader)
+	req, err := http.NewRequest("POST", url, bodyIoReader)
 	if err != nil {
 		log.Fatal("Error reading request. ", err)
 	}
 
+	authorization := fmt.Sprintf("Bearer %v", viper.Get("API_KEY"))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", authorization)
 
 	client := &http.Client{}
-
+	
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatalln(err)
