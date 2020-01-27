@@ -4,10 +4,11 @@ cms:
     provider: GraphCMS
 
 backups:
-    contentPath: ../backups/content
+    contentPath: ~/.cmsutil/backups/content
+    schemaPath: ~/.cmsutil/backups/content
     schemas:
         - Author
         - Blog
 
 API_URL: "Set your CMS API URL here or use envar CMSUTIL_API_URL on host"
-API_KEY: "Set your CMS API key here or use envar CMSUTIL_API_KEY on host"
+API_KEY: "Set your CMS API Key here or use envar CMSUTIL_API_KEY on host"

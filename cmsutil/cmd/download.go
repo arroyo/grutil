@@ -20,10 +20,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -38,12 +38,13 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Download CMS schemas and content")
 		download()
 	},
 }
 
 func download() {
-	var url string = os.Getenv("API_URL")
+	url := fmt.Sprintf("%v", viper.Get("API_URL"))
 	var requestBody string = `{"query":"query ($id: ID) {\n  blog(where: {id: $id}) {\n    status\n    updatedAt\n    createdAt\n    id\n    title\n    shortDescription\n    body\n    gallery {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    featuredImage {\n      status\n      updatedAt\n      createdAt\n      id\n      handle\n      fileName\n      height\n      width\n      size\n      mimeType\n    }\n    catgeory\n    metaDescription\n    metaKeywords\n    tags\n    slug\n    displayDate\n    author {\n      id\n    }\n  }\n}\n","variables":{"id":"ck5be29q8ogyf099618vjf0xp"}}`
 	bodyIoReader := strings.NewReader(requestBody)
 
