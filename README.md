@@ -2,6 +2,8 @@
 
 Headless CMS CLI
 
+*WIP - Not for production use yet*
+
 ## Config
 
 In your home directory create a folder called ".cmsutil" and put a text file called "config.yaml" in it.
@@ -18,4 +20,5 @@ API_KEY
 
 ## Packages
 
+go get github.com/spf13/cobra
 go get github.com/spf13/viper
