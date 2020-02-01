@@ -17,14 +17,10 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
+	"cmsutil/cms"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
 )
 
 // downloadCmd represents the download command
@@ -44,46 +40,9 @@ to quickly create a Cobra application.`,
 }
 
 func download() {
-	url := fmt.Sprintf("%v/export", viper.Get("API_URL"))
-	var requestBody string = `{
-		"fileType": "nodes",
-		"cursor": {
-		  "table": 0,
-		  "row": 0,
-		  "field": 0,
-		  "array": 0
-		}
-	  }`
-	bodyIoReader := strings.NewReader(requestBody)
-
-	req, err := http.NewRequest("POST", url, bodyIoReader)
-	if err != nil {
-		log.Fatal("Error reading request. ", err)
-	}
-
-	authorization := fmt.Sprintf("Bearer %v", viper.Get("API_KEY"))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", authorization)
-
-	client := &http.Client{}
-	
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	fmt.Println(string(body))
-
-	// Unserialize
-	var bodyJson interface{}
-	err = json.Unmarshal([]byte(body), &bodyJson)
-	fmt.Println(bodyJson)
+	var gcms cms.GraphCMS
+	gcms.Init(viper.Get("API_URL"), viper.Get("API_KEY"), viper.Get("backups.path"))
+	gcms.DownloadContent()
 }
 
 func init() {
