@@ -4,8 +4,8 @@ cms:
     provider: GraphCMS
 
 backups:
-    contentPath: ~/.cmsutil/backups/content
-    schemaPath: ~/.cmsutil/backups/content
+    path: ~/.cmsutil/backups
+    stage: "master"
     schemas:
         - Author
         - Blog

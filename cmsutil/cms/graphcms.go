@@ -20,18 +20,42 @@ import (
 
 type GraphCMS struct {
 	File
-	url interface {}
-	key interface {}
-	path interface {}
+	url 		interface {}
+	key 		interface {}
+	path 		string
+	structure	map[string]string
+	stage		string
 }
 
-func (g *GraphCMS) Init(url interface {}, key interface {}, path interface {}) {
+type Node struct {
+	TypeName 			string	`json:"_typeName"`
+	Id 					string	`json:"id"`
+	UpdatedAt 			string	`json:"updatedAt"`
+	ShortDescription 	string	`json:"shortDescription"`
+	DisplayDate 		string	`json:"displayDate"`
+	Slug 				string	`json:"slug"`
+	Status 				string	`json:"status"`
+	CreatedAt 			string	`json:"createdAt"`
+	Catgeory 			string	`json:"category"`
+	Title 				string	`json:"title"`
+}
+
+type NodeResponse struct {
+	Out struct {
+		JsonElements	[]interface {}	`json:"jsonElements"`
+	} 									`json:"out"`
+	Cursor 				interface {}	`json:"cursor"`
+	IsFull 				bool			`json:"isFull"`
+}
+
+func (g *GraphCMS) Init(url interface {}, key interface {}, path interface {}, stage interface {}) {
 	g.url = url
 	g.key = key
-	g.path = path
+	g.path = fmt.Sprintf("%v", path)
+	g.stage = fmt.Sprintf("%v", stage)
 }
 
-func (g *GraphCMS) GetNodes() {
+func (g *GraphCMS) GetNodes() (string, error) {
 	var requestBody string = `{
 		"fileType": "nodes",
 		"cursor": {
@@ -41,8 +65,23 @@ func (g *GraphCMS) GetNodes() {
 		  "array": 0
 		}
 	  }`
+	data, err := g.CallApi(requestBody, "export")
+
+	mapBody(data)
+
+	var nodes NodeResponse
+	err = json.Unmarshal([]byte(data), &nodes)
+
+	fmt.Println(reflect.TypeOf(nodes).String())
+	fmt.Println(reflect.TypeOf(nodes.Out).String())
+	fmt.Println(reflect.TypeOf(nodes.Out.JsonElements).String())
+
+	for index, _ := range nodes.Out.JsonElements {
+		fmt.Println(index)
+		fmt.Println(nodes.Out.JsonElements[index])
+	}
 	
-	g.CallApi(requestBody)
+	return string(data), err
 }
 
 func (g *GraphCMS) GetLists() {
@@ -56,7 +95,7 @@ func (g *GraphCMS) GetLists() {
 		}
 	  }`
 	
-	g.CallApi(requestBody)
+	g.CallApi(requestBody, "export")
 }
 
 func (g *GraphCMS) GetRelations() {
@@ -70,11 +109,26 @@ func (g *GraphCMS) GetRelations() {
 		}
 	  }`
 	
-	g.CallApi(requestBody)
+	g.CallApi(requestBody, "export")
 }
 
-func (g *GraphCMS) CallApi(requestBody string) {
-	url := fmt.Sprintf("%v/export", g.url)
+// Just for debugging, for now at least
+func mapBody(body []uint8) (error) {
+	fmt.Println(string(body))
+	fmt.Println(reflect.TypeOf(body).String())
+
+	// Unserialize
+	var bodyJson interface{}
+	err := json.Unmarshal([]byte(body), &bodyJson)
+
+	fmt.Println(bodyJson)
+	fmt.Println(reflect.TypeOf(bodyJson).String())
+
+	return err
+}
+
+func (g *GraphCMS) CallApi(requestBody string, route string) ([]uint8, error) {
+	url := fmt.Sprintf("%v/%v", g.url, route)
 	authorization := fmt.Sprintf("Bearer %v", g.key)
 	bodyIoReader := strings.NewReader(requestBody)
 
@@ -99,15 +153,7 @@ func (g *GraphCMS) CallApi(requestBody string) {
 		log.Fatalln(err)
 	}
 
-	fmt.Println(string(body))
-	fmt.Println(reflect.TypeOf(body).String())
-
-	// Unserialize
-	var bodyJson interface{}
-	err = json.Unmarshal([]byte(body), &bodyJson)
-
-	fmt.Println(bodyJson)
-	fmt.Println(reflect.TypeOf(bodyJson).String())
+	return body, err
 }
 
 func (g *GraphCMS) GetSchema() {
@@ -121,13 +167,22 @@ func (g *GraphCMS) GetSchemas() {
 func (g *GraphCMS) GetContent() {
 	fmt.Println("GetContent")
 
-	g.GetNodes()
+	// nodes, err := g.GetNodes()
 	g.GetLists()
 	g.GetRelations()
 }
 
 func (g *GraphCMS) DownloadContent() {
-	g.GetContent()
-	g.Folder = "/content"; g.Filename = "file.json";
-	g.WriteFile(fmt.Sprintf("%v", g.path))
+	/* Get nodes from GraphCMS and write to file */
+	data, err := g.GetNodes()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	g.Path = g.path; g.Folder = fmt.Sprintf("/content/%v/nodes", g.stage); g.Filename = "0001.json";
+	g.WriteFile(data)
+
+	/* Get lists from GraphCMS and write to file */
+
+	/* Get relations from GraphCMS and write to file */
 }

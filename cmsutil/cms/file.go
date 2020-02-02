@@ -13,10 +13,16 @@ import (
 )
 
 type File struct {
+	Path string
 	Folder string
 	Filename string
 }
 
-func (f *File) WriteFile(path string) {
-	fmt.Println("cms package: File: "+path+f.Folder+"/"+f.Filename)
+func (f *File) WriteFile(data string) {
+	// check if folder empty?
+	// make sure filepath is not empty
+
+	var filepath = fmt.Sprintf("%v%v/%v", f.Path, f.Folder, f.Filename)
+	
+	fmt.Println("cms package: WriteFile: "+filepath)
 }

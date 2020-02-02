@@ -41,7 +41,7 @@ to quickly create a Cobra application.`,
 
 func download() {
 	var gcms cms.GraphCMS
-	gcms.Init(viper.Get("API_URL"), viper.Get("API_KEY"), viper.Get("backups.path"))
+	gcms.Init(viper.Get("API_URL"), viper.Get("API_KEY"), viper.Get("backups.path"), viper.Get("backups.stage"))
 	gcms.DownloadContent()
 }
 
