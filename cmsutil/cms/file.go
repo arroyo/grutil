@@ -89,3 +89,8 @@ func (f *File) WriteFile(data string) {
 	file.Sync()
 	file.Close()
 }
+
+func (f *File) DownloadFile(url string, filename string) {
+	fmt.Println(url)
+	// file, err := os.Create(filename)
+}

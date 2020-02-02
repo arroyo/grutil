@@ -28,24 +28,9 @@ type GraphCMS struct {
 }
 
 type Node struct {
-	TypeName         string `json:"_typeName"`
-	Id               string `json:"id"`
-	UpdatedAt        string `json:"updatedAt"`
-	ShortDescription string `json:"shortDescription"`
-	DisplayDate      string `json:"displayDate"`
-	Slug             string `json:"slug"`
-	Status           string `json:"status"`
-	CreatedAt        string `json:"createdAt"`
-	Catgeory         string `json:"category"`
-	Title            string `json:"title"`
-}
-
-type NodeResponse struct {
-	Out struct {
-		JsonElements []interface{} `json:"jsonElements"`
-	} `json:"out"`
-	Cursor interface{} `json:"cursor"`
-	IsFull bool        `json:"isFull"`
+	TypeName 	string `json:"_typeName"`
+	Id         	string `json:"id"`
+	Handle    	string `json:"handle"`
 }
 
 type ApiResponse struct {
@@ -75,13 +60,8 @@ func (g *GraphCMS) GetNodes() ([]interface{}, error) {
 	  }`
 	data, err := g.CallApi(requestBody, "export")
 
-	mapBody(data)
-
-	var nodes NodeResponse
+	var nodes ApiResponse
 	err = json.Unmarshal([]byte(data), &nodes)
-
-	// fmt.Println(reflect.TypeOf(nodes).String())
-	// fmt.Println(reflect.TypeOf(nodes.Out).String())
 
 	return nodes.Out.JsonElements, err
 }
@@ -190,6 +170,26 @@ func (g *GraphCMS) GetContent() {
 	g.GetRelations()
 }
 
+// Loop through nodes, look for assets and download
+func (g *GraphCMS) DownloadAssets(data []interface{}) {
+	g.Folder = "/assets"
+	var node Node
+
+	// Loop through nodes, find assets and download them
+	for index, _ := range data {		
+		byteData, _ := json.Marshal(data[index])
+		err := json.Unmarshal(byteData, &node)
+		if err != nil {
+			panic(err)
+		}
+
+		if node.TypeName == "Asset" {
+			url := fmt.Sprintf("https://media.graphcms.com/%v", node.Handle)
+			g.DownloadFile(url, node.Handle)
+		}
+	}
+}
+
 func (g *GraphCMS) DownloadContent() {
 	/* Get nodes from GraphCMS and write to file */
 	data, err := g.GetNodes()
@@ -200,6 +200,9 @@ func (g *GraphCMS) DownloadContent() {
 	// Write nodes to file
 	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
 	g.WriteFileJson(data)
+
+	// Download all assets
+	g.DownloadAssets(data)
 
 	/* Get lists from GraphCMS and write to file */
 	data, err = g.GetLists()
