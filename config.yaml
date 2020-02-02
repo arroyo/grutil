@@ -4,7 +4,7 @@ cms:
     provider: GraphCMS
 
 backups:
-    path: ~/.cmsutil/backups
+    path: /Users/jarroyo/.cmsutil/backups
     stage: "master"
     schemas:
         - Author

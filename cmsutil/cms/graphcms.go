@@ -20,11 +20,11 @@ import (
 
 type GraphCMS struct {
 	File
-	url       interface{}
-	key       interface{}
-	path      string
-	structure map[string]string
-	stage     string
+	url        interface{}
+	key        interface{}
+	configPath string
+	structure  map[string]string
+	stage      string
 }
 
 type Node struct {
@@ -48,14 +48,22 @@ type NodeResponse struct {
 	IsFull bool        `json:"isFull"`
 }
 
+type ApiResponse struct {
+	Out struct {
+		JsonElements []interface{} `json:"jsonElements"`
+	} `json:"out"`
+	Cursor interface{} `json:"cursor"`
+	IsFull bool        `json:"isFull"`
+}
+
 func (g *GraphCMS) Init(url interface{}, key interface{}, path interface{}, stage interface{}) {
 	g.url = url
 	g.key = key
-	g.path = fmt.Sprintf("%v", path)
+	g.configPath = fmt.Sprintf("%v", path)
 	g.stage = fmt.Sprintf("%v", stage)
 }
 
-func (g *GraphCMS) GetNodes() (string, error) {
+func (g *GraphCMS) GetNodes() ([]interface{}, error) {
 	var requestBody string = `{
 		"fileType": "nodes",
 		"cursor": {
@@ -72,19 +80,13 @@ func (g *GraphCMS) GetNodes() (string, error) {
 	var nodes NodeResponse
 	err = json.Unmarshal([]byte(data), &nodes)
 
-	fmt.Println(reflect.TypeOf(nodes).String())
-	fmt.Println(reflect.TypeOf(nodes.Out).String())
-	fmt.Println(reflect.TypeOf(nodes.Out.JsonElements).String())
+	// fmt.Println(reflect.TypeOf(nodes).String())
+	// fmt.Println(reflect.TypeOf(nodes.Out).String())
 
-	for index, _ := range nodes.Out.JsonElements {
-		fmt.Println(index)
-		fmt.Println(nodes.Out.JsonElements[index])
-	}
-
-	return string(data), err
+	return nodes.Out.JsonElements, err
 }
 
-func (g *GraphCMS) GetLists() {
+func (g *GraphCMS) GetLists() ([]interface{}, error) {
 	var requestBody string = `{
 		"fileType": "lists",
 		"cursor": {
@@ -95,10 +97,18 @@ func (g *GraphCMS) GetLists() {
 		}
 	  }`
 
-	g.CallApi(requestBody, "export")
+	data, err := g.CallApi(requestBody, "export")
+
+	var lists ApiResponse
+	err = json.Unmarshal([]byte(data), &lists)
+
+	fmt.Println(reflect.TypeOf(lists).String())
+	fmt.Println(reflect.TypeOf(lists.Out).String())
+
+	return lists.Out.JsonElements, err
 }
 
-func (g *GraphCMS) GetRelations() {
+func (g *GraphCMS) GetRelations() ([]interface{}, error) {
 	var requestBody string = `{
 		"fileType": "relations",
 		"cursor": {
@@ -109,7 +119,15 @@ func (g *GraphCMS) GetRelations() {
 		}
 	  }`
 
-	g.CallApi(requestBody, "export")
+	data, err := g.CallApi(requestBody, "export")
+
+	var relations ApiResponse
+	err = json.Unmarshal([]byte(data), &relations)
+
+	fmt.Println(reflect.TypeOf(relations).String())
+	fmt.Println(reflect.TypeOf(relations.Out).String())
+
+	return relations.Out.JsonElements, err
 }
 
 // Just for debugging, for now at least
@@ -179,12 +197,27 @@ func (g *GraphCMS) DownloadContent() {
 		log.Fatalln(err)
 	}
 
-	g.Path = g.path
-	g.Folder = fmt.Sprintf("/content/%v/nodes", g.stage)
-	g.Filename = "0001.json"
-	g.WriteFile(data)
+	// Write nodes to file
+	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
+	g.WriteFileJson(data)
 
 	/* Get lists from GraphCMS and write to file */
+	data, err = g.GetLists()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Write lists to file
+	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
+	g.WriteFileJson(data)
 
 	/* Get relations from GraphCMS and write to file */
+	data, err = g.GetRelations()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Write relations to file
+	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
+	g.WriteFileJson(data)
 }
