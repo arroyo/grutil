@@ -1,3 +1,6 @@
 .DS_Store
 env.sh
 github.com/
+golang.org/
+gopkg.in/
+temp/
