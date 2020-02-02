@@ -20,35 +20,35 @@ import (
 
 type GraphCMS struct {
 	File
-	url 		interface {}
-	key 		interface {}
-	path 		string
-	structure	map[string]string
-	stage		string
+	url       interface{}
+	key       interface{}
+	path      string
+	structure map[string]string
+	stage     string
 }
 
 type Node struct {
-	TypeName 			string	`json:"_typeName"`
-	Id 					string	`json:"id"`
-	UpdatedAt 			string	`json:"updatedAt"`
-	ShortDescription 	string	`json:"shortDescription"`
-	DisplayDate 		string	`json:"displayDate"`
-	Slug 				string	`json:"slug"`
-	Status 				string	`json:"status"`
-	CreatedAt 			string	`json:"createdAt"`
-	Catgeory 			string	`json:"category"`
-	Title 				string	`json:"title"`
+	TypeName         string `json:"_typeName"`
+	Id               string `json:"id"`
+	UpdatedAt        string `json:"updatedAt"`
+	ShortDescription string `json:"shortDescription"`
+	DisplayDate      string `json:"displayDate"`
+	Slug             string `json:"slug"`
+	Status           string `json:"status"`
+	CreatedAt        string `json:"createdAt"`
+	Catgeory         string `json:"category"`
+	Title            string `json:"title"`
 }
 
 type NodeResponse struct {
 	Out struct {
-		JsonElements	[]interface {}	`json:"jsonElements"`
-	} 									`json:"out"`
-	Cursor 				interface {}	`json:"cursor"`
-	IsFull 				bool			`json:"isFull"`
+		JsonElements []interface{} `json:"jsonElements"`
+	} `json:"out"`
+	Cursor interface{} `json:"cursor"`
+	IsFull bool        `json:"isFull"`
 }
 
-func (g *GraphCMS) Init(url interface {}, key interface {}, path interface {}, stage interface {}) {
+func (g *GraphCMS) Init(url interface{}, key interface{}, path interface{}, stage interface{}) {
 	g.url = url
 	g.key = key
 	g.path = fmt.Sprintf("%v", path)
@@ -80,7 +80,7 @@ func (g *GraphCMS) GetNodes() (string, error) {
 		fmt.Println(index)
 		fmt.Println(nodes.Out.JsonElements[index])
 	}
-	
+
 	return string(data), err
 }
 
@@ -94,7 +94,7 @@ func (g *GraphCMS) GetLists() {
 		  "array": 0
 		}
 	  }`
-	
+
 	g.CallApi(requestBody, "export")
 }
 
@@ -108,12 +108,12 @@ func (g *GraphCMS) GetRelations() {
 		  "array": 0
 		}
 	  }`
-	
+
 	g.CallApi(requestBody, "export")
 }
 
 // Just for debugging, for now at least
-func mapBody(body []uint8) (error) {
+func mapBody(body []uint8) error {
 	fmt.Println(string(body))
 	fmt.Println(reflect.TypeOf(body).String())
 
@@ -161,7 +161,7 @@ func (g *GraphCMS) GetSchema() {
 }
 
 func (g *GraphCMS) GetSchemas() {
-	fmt.Println("GetSchemas")	
+	fmt.Println("GetSchemas")
 }
 
 func (g *GraphCMS) GetContent() {
@@ -179,7 +179,9 @@ func (g *GraphCMS) DownloadContent() {
 		log.Fatalln(err)
 	}
 
-	g.Path = g.path; g.Folder = fmt.Sprintf("/content/%v/nodes", g.stage); g.Filename = "0001.json";
+	g.Path = g.path
+	g.Folder = fmt.Sprintf("/content/%v/nodes", g.stage)
+	g.Filename = "0001.json"
 	g.WriteFile(data)
 
 	/* Get lists from GraphCMS and write to file */

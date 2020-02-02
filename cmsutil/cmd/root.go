@@ -107,9 +107,9 @@ func initConfig() {
 	viper.SetDefault("backups.contentpath", home+"/.cmsutil/backups/content")
 	viper.Set("cms.host", "set override in code")
 
-	/* 
-	Fold viper config into the Config struct
-	@note don't have a good way to pass this structure into a command's func
+	/*
+		Fold viper config into the Config struct
+		@note don't have a good way to pass this structure into a command's func
 	*/
 	var configuration Config
 	err = viper.Unmarshal(&configuration)
