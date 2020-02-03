@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-    "net/http"
+	"net/http"
 	"os"
 )
 
@@ -90,14 +90,14 @@ func (f *File) WriteFile(data string) {
 	file.Close()
 }
 
-func (f *File) DownloadFile(url string, filename string) (error) {
-	fmt.Println("Download file "+url)
+func (f *File) DownloadFile(url string, filename string) error {
+	fmt.Println("Download file " + url)
 
-    resp, err := http.Get(url)
-    if err != nil {
-        return err
-    }
-    defer resp.Body.Close()
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
 	// Make sure folder exists
 	folderpath := fmt.Sprintf("%v%v", f.Path, f.Folder)
@@ -105,13 +105,13 @@ func (f *File) DownloadFile(url string, filename string) (error) {
 
 	// Create the file
 	filepath := fmt.Sprintf("%v/%v", folderpath, filename)
-    out, err := os.Create(filepath)
-    if err != nil { 
-        return err
-    }
-    defer out.Close()
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
 
-    // Write the body to file
-    _, err = io.Copy(out, resp.Body)
-    return err
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

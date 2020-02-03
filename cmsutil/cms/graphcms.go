@@ -28,9 +28,9 @@ type GraphCMS struct {
 }
 
 type Node struct {
-	TypeName 	string `json:"_typeName"`
-	Id         	string `json:"id"`
-	Handle    	string `json:"handle"`
+	TypeName string `json:"_typeName"`
+	Id       string `json:"id"`
+	Handle   string `json:"handle"`
 }
 
 type ApiResponse struct {
@@ -172,7 +172,7 @@ func (g *GraphCMS) DownloadAssets(data []interface{}) {
 	var node Node
 
 	// Loop through nodes, find assets and download them
-	for index, _ := range data {		
+	for index, _ := range data {
 		byteData, _ := json.Marshal(data[index])
 		err := json.Unmarshal(byteData, &node)
 		if err != nil {

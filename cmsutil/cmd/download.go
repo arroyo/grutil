@@ -27,7 +27,7 @@ import (
 var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download all content and assets",
-	Long: `Download all node, list, and relation metadata.  Download assets.`,
+	Long:  `Download all node, list, and relation metadata.  Download assets.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Begin download of CMS content and schemas...")
 		download()
