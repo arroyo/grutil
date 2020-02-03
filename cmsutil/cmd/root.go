@@ -105,7 +105,7 @@ func initConfig() {
 
 	viper.SetDefault("backups.schemapath", home+"/.cmsutil/backups/schema")
 	viper.SetDefault("backups.contentpath", home+"/.cmsutil/backups/content")
-	viper.Set("cms.host", "set override in code")
+	// viper.Set("cms.host", "set override in code") // Example override
 
 	/*
 		Fold viper config into the Config struct
@@ -117,7 +117,4 @@ func initConfig() {
 		fmt.Printf("Unable to decode into struct, %v", err)
 		log.Fatalln(err)
 	}
-
-	fmt.Println(configuration)
-	fmt.Println("\n")
 }

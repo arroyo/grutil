@@ -82,8 +82,8 @@ func (g *GraphCMS) GetLists() ([]interface{}, error) {
 	var lists ApiResponse
 	err = json.Unmarshal([]byte(data), &lists)
 
-	fmt.Println(reflect.TypeOf(lists).String())
-	fmt.Println(reflect.TypeOf(lists.Out).String())
+	// fmt.Println(reflect.TypeOf(lists).String())
+	// fmt.Println(reflect.TypeOf(lists.Out).String())
 
 	return lists.Out.JsonElements, err
 }
@@ -100,12 +100,8 @@ func (g *GraphCMS) GetRelations() ([]interface{}, error) {
 	  }`
 
 	data, err := g.CallApi(requestBody, "export")
-
 	var relations ApiResponse
 	err = json.Unmarshal([]byte(data), &relations)
-
-	fmt.Println(reflect.TypeOf(relations).String())
-	fmt.Println(reflect.TypeOf(relations.Out).String())
 
 	return relations.Out.JsonElements, err
 }
@@ -185,7 +181,10 @@ func (g *GraphCMS) DownloadAssets(data []interface{}) {
 
 		if node.TypeName == "Asset" {
 			url := fmt.Sprintf("https://media.graphcms.com/%v", node.Handle)
-			g.DownloadFile(url, node.Handle)
+			err = g.DownloadFile(url, node.Handle)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
@@ -201,7 +200,8 @@ func (g *GraphCMS) DownloadContent() {
 	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
-	// Download all assets
+	// Download all assets into the assets folder
+	g.Folder = "/assets"
 	g.DownloadAssets(data)
 
 	/* Get lists from GraphCMS and write to file */

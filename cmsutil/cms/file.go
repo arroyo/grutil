@@ -11,7 +11,9 @@ package cms
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+    "net/http"
 	"os"
 )
 
@@ -35,8 +37,6 @@ func checkErr(e error) {
 
 // Check to see if the folder exists, if not create it.
 func prepFolder(folder string) {
-	fmt.Println("Fullpath: " + folder)
-
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
 		os.MkdirAll(folder, os.ModePerm)
 	}
@@ -90,7 +90,28 @@ func (f *File) WriteFile(data string) {
 	file.Close()
 }
 
-func (f *File) DownloadFile(url string, filename string) {
-	fmt.Println(url)
-	// file, err := os.Create(filename)
+func (f *File) DownloadFile(url string, filename string) (error) {
+	fmt.Println("Download file "+url)
+
+    resp, err := http.Get(url)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+
+	// Make sure folder exists
+	folderpath := fmt.Sprintf("%v%v", f.Path, f.Folder)
+	prepFolder(folderpath)
+
+	// Create the file
+	filepath := fmt.Sprintf("%v/%v", folderpath, filename)
+    out, err := os.Create(filepath)
+    if err != nil { 
+        return err
+    }
+    defer out.Close()
+
+    // Write the body to file
+    _, err = io.Copy(out, resp.Body)
+    return err
 }
