@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"regexp"
 )
 
 var cfgFile string
@@ -107,9 +108,21 @@ func initConfig() {
 	viper.SetDefault("backups.contentpath", home+"/.cmsutil/backups/content")
 	// viper.Set("cms.host", "set override in code") // Example override
 
+	// Validate API URL
+	apiUrl := viper.Get("API_URL")
+	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))
+	fmt.Println(matched)
+	if !matched {
+		log.Fatalln("Setting API_URL does not contain a valid URL")
+	}
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	/*
 		Fold viper config into the Config struct
 		@note don't have a good way to pass this structure into a command's func
+		It is not currently being used.
 	*/
 	var configuration Config
 	err = viper.Unmarshal(&configuration)
