@@ -2,7 +2,9 @@
 
 Headless CMS CLI
 
-*WIP - Not for production use yet*
+*Not yet in alpha, use with caution*
+
+The current version works with [GraphCMS](https://graphcms.com/)
 
 ## Config
 
@@ -12,13 +14,26 @@ There is an example config file in the repo.
 
 It has been tested with YAML, but it is possible to use JSON or TOML (use the extensions .json and .toml respectively).
 
+API_URL must start with http:// or https://
+
 ### Envars
 
-API_URL
+You can override the settings in your yaml config with the following environment variables
 
-API_KEY
+CMSUTIL_API_URL
 
-## Packages
+CMSUTIL_API_KEY
 
-go get github.com/spf13/cobra
-go get github.com/spf13/viper
+## Usage
+
+Backup your content
+
+```
+cmsutil download
+```
+
+Get help
+
+```
+cmsutil help
+```
