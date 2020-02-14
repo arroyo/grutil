@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"cmsutil/cmd"
+	"github.com/arroyo/cmsutil/cmd"
 )
 
 func main() {
