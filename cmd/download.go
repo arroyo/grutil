@@ -17,8 +17,8 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/arroyo/cmsutil/cms"
 	"fmt"
+	"github.com/arroyo/cmsutil/cms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
