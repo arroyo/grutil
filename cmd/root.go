@@ -32,8 +32,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "cmsutil",
 	Short: "CMS Utility",
-	Long: `A headless CMS utility 
-  A tool for unteracting with a headless CMS for simple tasks like backup`,
+	Long: `A headless CMS utility for interacting with a headless CMS for simple tasks like backup`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -110,10 +109,9 @@ func initConfig() {
 
 	// Validate API URL
 	apiUrl := viper.Get("API_URL")
-	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))
-	fmt.Println(matched)
+	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))	
 	if !matched {
-		log.Fatalln("Setting API_URL does not contain a valid URL")
+		log.Fatalln("Setting API_URL does not contain a valid URL.")
 	}
 	if err != nil {
 		log.Fatalln(err)
