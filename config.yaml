@@ -10,5 +10,5 @@ backups:
         - Author
         - Blog
 
-API_URL: "Set your CMS API URL here or use envar CMSUTIL_API_URL on host"
-API_KEY: "Set your CMS API Key here or use envar CMSUTIL_API_KEY on host"
+CMS_API_URL: "Set your CMS API URL here or use envar CMSUTIL_API_URL on host"
+CMS_API_KEY: "Set your CMS API Key here or use envar CMSUTIL_API_KEY on host"

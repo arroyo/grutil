@@ -2,9 +2,11 @@
 
 Headless CMS CLI
 
-*Not yet in alpha, use with caution*
+*Alpha*
 
-The current version works with [GraphCMS](https://graphcms.com/)
+Log any issues to Github issues.
+
+The current version works with [GraphCMS](https://graphcms.com/) and backs up your project to disk, including asset files.
 
 ## Config
 
@@ -14,15 +16,15 @@ There is an example config file in the repo.
 
 It has been tested with YAML, but it is possible to use JSON or TOML (use the extensions .json and .toml respectively).
 
-API_URL must start with http:// or https://
+CMS_API_URL must start with http:// or https://
 
 ### Envars
 
 You can override the settings in your yaml config with the following environment variables
 
-CMSUTIL_API_URL
+CMS_API_URL
 
-CMSUTIL_API_KEY
+CMS_API_KEY
 
 ## Usage
 

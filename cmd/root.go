@@ -96,7 +96,7 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-	viper.SetEnvPrefix("CMSUTIL")
+	// viper.SetEnvPrefix("CMSUTIL")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
@@ -108,10 +108,10 @@ func initConfig() {
 	// viper.Set("cms.host", "set override in code") // Example override
 
 	// Validate API URL
-	apiUrl := viper.Get("API_URL")
+	apiUrl := viper.Get("CMS_API_URL")
 	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))	
 	if !matched {
-		log.Fatalln("Setting API_URL does not contain a valid URL.")
+		log.Fatalln("Config setting CMS_API_URL does not contain a valid URL.")
 	}
 	if err != nil {
 		log.Fatalln(err)

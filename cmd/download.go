@@ -29,14 +29,14 @@ var downloadCmd = &cobra.Command{
 	Short: "Download all content and assets",
 	Long:  `Download all node, list, and relation metadata.  Download assets.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Begin download of CMS content and schemas...")
+		fmt.Println("Begin download of CMS content...")
 		download()
 	},
 }
 
 func download() {
 	var gcms cms.GraphCMS
-	gcms.Init(viper.Get("API_URL"), viper.Get("API_KEY"), viper.Get("backups.path"), viper.Get("backups.stage"))
+	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.path"), viper.Get("backups.stage"))
 	gcms.DownloadContent()
 }
 
