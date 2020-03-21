@@ -11,6 +11,6 @@ package cms
 type Provider interface {
 	GetSchema(name string) string
 	GetSchemas() string
-	GetNodes() ([]interface{}, error)
+	GetNodes() []interface{}
 	DownloadContent()
 }

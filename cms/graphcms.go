@@ -49,7 +49,7 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, path interface{}, stag
 	g.stage = fmt.Sprintf("%v", stage)
 }
 
-func (g *GraphCMS) GetNodes() ([]interface{}, error) {
+func (g *GraphCMS) GetNodes() []interface{} {
 	var requestBody string = `{
 		"fileType": "nodes",
 		"cursor": {
@@ -59,23 +59,17 @@ func (g *GraphCMS) GetNodes() ([]interface{}, error) {
 		  "array": 0
 		}
 	  }`
-	data, err := g.CallApi(requestBody, "export")
+	nodes, err := g.CallApi(requestBody, "export")
+
+	// Handle any returned errors
 	if err != nil {
-		log.Printf("err calling api: \n%v", err)
-		return nil, err
+		log.Printf("Error getting nodes from api: \n%v", err)
 	}
 
-	var nodes ApiResponse
-	err = json.Unmarshal([]byte(data), &nodes)
-
-	if nodes.Errors != nil {
-		log.Fatalf("GraphCMS API returned an error: %v", nodes.Errors[0])
-	}
-
-	return nodes.Out.JsonElements, err
+	return nodes.Out.JsonElements
 }
 
-func (g *GraphCMS) GetLists() ([]interface{}, error) {
+func (g *GraphCMS) GetLists() []interface{} {
 	var requestBody string = `{
 		"fileType": "lists",
 		"cursor": {
@@ -85,21 +79,20 @@ func (g *GraphCMS) GetLists() ([]interface{}, error) {
 		  "array": 0
 		}
 	  }`
-	data, err := g.CallApi(requestBody, "export")
-	if err != nil {
-		log.Fatal("Error getting lists. ", err)
-	}
+	lists, err := g.CallApi(requestBody, "export")
 
-	var lists ApiResponse
-	err = json.Unmarshal([]byte(data), &lists)
+	// Handle any returned errors
+	if err != nil {
+		log.Printf("Error getting lists from api: \n%v", err)
+	}
 
 	// fmt.Println(reflect.TypeOf(lists).String())
 	// fmt.Println(reflect.TypeOf(lists.Out).String())
 
-	return lists.Out.JsonElements, err
+	return lists.Out.JsonElements
 }
 
-func (g *GraphCMS) GetRelations() ([]interface{}, error) {
+func (g *GraphCMS) GetRelations() []interface{} {
 	var requestBody string = `{
 		"fileType": "relations",
 		"cursor": {
@@ -109,15 +102,14 @@ func (g *GraphCMS) GetRelations() ([]interface{}, error) {
 		  "array": 0
 		}
 	  }`
-	data, err := g.CallApi(requestBody, "export")
+	relations, err := g.CallApi(requestBody, "export")
+	
+	// Handle any returned errors
 	if err != nil {
-		log.Fatal("Error getting relations. ", err)
+		log.Printf("Error getting relations from api: \n%v", err)
 	}
 
-	var relations ApiResponse
-	err = json.Unmarshal([]byte(data), &relations)
-
-	return relations.Out.JsonElements, err
+	return relations.Out.JsonElements
 }
 
 // Just for debugging, for now at least
@@ -136,7 +128,7 @@ func mapBody(body []uint8) error {
 }
 
 // Make a GraphCMS API call
-func (g *GraphCMS) CallApi(requestBody string, route string) ([]uint8, error) {
+func (g *GraphCMS) CallApi(requestBody string, route string) (ApiResponse, error) {
 	url := fmt.Sprintf("%v/%v", g.url, route)
 	authorization := fmt.Sprintf("Bearer %v", g.key)
 	bodyIoReader := strings.NewReader(requestBody)
@@ -162,7 +154,15 @@ func (g *GraphCMS) CallApi(requestBody string, route string) ([]uint8, error) {
 		log.Fatalln(err)
 	}
 
-	return body, err
+	// Process the response
+	var apiResp ApiResponse
+	err = json.Unmarshal([]byte(body), &apiResp)
+
+	if apiResp.Errors != nil {
+		log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0])
+	}
+
+	return apiResp, err
 }
 
 // Get a single schema as json
@@ -213,10 +213,7 @@ func (g *GraphCMS) DownloadAssets(data []interface{}) {
 
 func (g *GraphCMS) DownloadContent() {
 	/* Get nodes from GraphCMS and write to file */
-	data, err := g.GetNodes()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	data := g.GetNodes()
 
 	// Write nodes to file
 	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
@@ -227,20 +224,14 @@ func (g *GraphCMS) DownloadContent() {
 	g.DownloadAssets(data)
 
 	/* Get lists from GraphCMS and write to file */
-	data, err = g.GetLists()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	data = g.GetLists()
 
 	// Write lists to file
 	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	/* Get relations from GraphCMS and write to file */
-	data, err = g.GetRelations()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	data = g.GetRelations()
 
 	// Write relations to file
 	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
