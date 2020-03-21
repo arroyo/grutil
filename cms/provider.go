@@ -9,8 +9,8 @@ All CMS implementations should implement this interface.
 package cms
 
 type Provider interface {
-	GetSchema() string
+	GetSchema(name string) string
 	GetSchemas() string
-	GetContent() string
+	GetNodes() ([]interface{}, error)
 	DownloadContent()
 }

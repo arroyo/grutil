@@ -39,6 +39,7 @@ type ApiResponse struct {
 	} `json:"out"`
 	Cursor interface{} `json:"cursor"`
 	IsFull bool        `json:"isFull"`
+	Errors []string    `json:"errors"`
 }
 
 func (g *GraphCMS) Init(url interface{}, key interface{}, path interface{}, stage interface{}) {
@@ -59,9 +60,17 @@ func (g *GraphCMS) GetNodes() ([]interface{}, error) {
 		}
 	  }`
 	data, err := g.CallApi(requestBody, "export")
+	if err != nil {
+		log.Printf("err calling api: \n%v", err)
+		return nil, err
+	}
 
 	var nodes ApiResponse
 	err = json.Unmarshal([]byte(data), &nodes)
+
+	if nodes.Errors != nil {
+		log.Fatalf("GraphCMS API returned an error: %v", nodes.Errors[0])
+	}
 
 	return nodes.Out.JsonElements, err
 }
@@ -76,8 +85,10 @@ func (g *GraphCMS) GetLists() ([]interface{}, error) {
 		  "array": 0
 		}
 	  }`
-
 	data, err := g.CallApi(requestBody, "export")
+	if err != nil {
+		log.Fatal("Error getting lists. ", err)
+	}
 
 	var lists ApiResponse
 	err = json.Unmarshal([]byte(data), &lists)
@@ -98,8 +109,11 @@ func (g *GraphCMS) GetRelations() ([]interface{}, error) {
 		  "array": 0
 		}
 	  }`
-
 	data, err := g.CallApi(requestBody, "export")
+	if err != nil {
+		log.Fatal("Error getting relations. ", err)
+	}
+
 	var relations ApiResponse
 	err = json.Unmarshal([]byte(data), &relations)
 
@@ -121,6 +135,7 @@ func mapBody(body []uint8) error {
 	return err
 }
 
+// Make a GraphCMS API call
 func (g *GraphCMS) CallApi(requestBody string, route string) ([]uint8, error) {
 	url := fmt.Sprintf("%v/%v", g.url, route)
 	authorization := fmt.Sprintf("Bearer %v", g.key)
@@ -150,20 +165,27 @@ func (g *GraphCMS) CallApi(requestBody string, route string) ([]uint8, error) {
 	return body, err
 }
 
-func (g *GraphCMS) GetSchema() {
-	fmt.Println("GetSchema")
+// Get a single schema as json
+func (g *GraphCMS) GetSchema(name string) string {
+	var jsonSchema = `{
+		"name": "schema",
+		"complete": "me"
+	}`
+	fmt.Println(jsonSchema)
+	return jsonSchema
 }
 
-func (g *GraphCMS) GetSchemas() {
-	fmt.Println("GetSchemas")
-}
+// Get all schemas as json
+func (g *GraphCMS) GetSchemas() string {
+	// Loop through schemas in the config
+	// Call g.GetSchema(schema) for each
+	// Return array of json schemas as json as text
+	var jsonSchemas = `[{
+		"name": "schema",
+		"complete": "me"
+	}]`
 
-func (g *GraphCMS) GetContent() {
-	fmt.Println("GetContent")
-
-	// nodes, err := g.GetNodes()
-	g.GetLists()
-	g.GetRelations()
+	return jsonSchemas
 }
 
 // Loop through nodes, look for assets and download
