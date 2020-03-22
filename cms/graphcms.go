@@ -22,7 +22,7 @@ type GraphCMS struct {
 	File
 	url        interface{}
 	key        interface{}
-	configPath string
+	path 	   string
 	structure  map[string]string
 	stage      string
 }
@@ -42,10 +42,10 @@ type ApiResponse struct {
 	Errors []string    `json:"errors"`
 }
 
-func (g *GraphCMS) Init(url interface{}, key interface{}, path interface{}, stage interface{}) {
+func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, path string) {
 	g.url = url
 	g.key = key
-	g.configPath = fmt.Sprintf("%v", path)
+	g.path = path
 	g.stage = fmt.Sprintf("%v", stage)
 }
 
@@ -216,7 +216,7 @@ func (g *GraphCMS) DownloadContent() {
 	data := g.GetNodes()
 
 	// Write nodes to file
-	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	// Download all assets into the assets folder
@@ -227,13 +227,13 @@ func (g *GraphCMS) DownloadContent() {
 	data = g.GetLists()
 
 	// Write lists to file
-	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	/* Get relations from GraphCMS and write to file */
 	data = g.GetRelations()
 
 	// Write relations to file
-	g.FileInit(g.configPath, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
 	g.WriteFileJson(data)
 }

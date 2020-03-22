@@ -28,14 +28,16 @@ CMS_API_KEY
 
 ## Usage
 
-Backup your content
+Backup your content with the download command.  Optionally add a sub folder name after the download command.
 
 ```
 cmsutil download
+cmsutil download myfolder
 ```
 
-Get help
+Get general help or help with a specific command using.
 
 ```
 cmsutil help
+cmsutil download -h
 ```

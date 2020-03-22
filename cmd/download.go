@@ -27,16 +27,29 @@ import (
 var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download all content and assets",
-	Long:  `Download all node, list, and relation metadata.  Download assets.`,
+	Long:  `Download all node, list, and relation metadata as well as download all assets.  
+	Everything will be saved in the folder set in your config file.
+	An optional subfolder name can be added, e.g. cmsutil download myfolder
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Begin download of CMS content...")
-		download()
+		download(args)
 	},
 }
 
-func download() {
+func download(args []string) {
+	// Determine base file path
+	var path string
+	if len(args) > 0 {
+		path = fmt.Sprintf("%v/%v", viper.Get("backups.path"), args[0])
+	} else {
+		path = fmt.Sprintf("%v", viper.Get("backups.path"))
+	}
+
+	fmt.Printf("Your downloads will be stored at %v\n", path)
+	fmt.Println("Begin download of CMS content...")
+
 	var gcms cms.GraphCMS
-	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.path"), viper.Get("backups.stage"))
+	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), path)
 	gcms.DownloadContent()
 }
 
