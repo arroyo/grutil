@@ -38,7 +38,6 @@ var downloadCmd = &cobra.Command{
 
 func download(args []string) {
 	// Determine base file path
-	var path string
 	if len(args) > 0 {
 		path = fmt.Sprintf("%v/%v", viper.Get("backups.path"), args[0])
 	} else {

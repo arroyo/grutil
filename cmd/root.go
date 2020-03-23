@@ -26,7 +26,7 @@ import (
 	"regexp"
 )
 
-var cfgFile string
+var cfgFile, path, developer, directory string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -71,7 +71,9 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmsutil/config.yaml)")
-
+	rootCmd.PersistentFlags().StringVar(&developer, "developer", "Unknown Developer!", "Developer name.")
+	rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Add sub directory in config path")
+	
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
