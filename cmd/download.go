@@ -15,7 +15,7 @@ import (
 var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download all content and assets",
-	Long:  `Download all node, list, and relation metadata as well as download all assets.  
+	Long: `Download all node, list, and relation metadata as well as download all assets.  
 	Everything will be saved in the folder set in your config file.
 	An optional subfolder name can be added, e.g. cmsutil download myfolder
 	`,

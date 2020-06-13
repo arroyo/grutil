@@ -25,7 +25,7 @@ to quickly create a Cobra application.`,
 		fmt.Println("directory: ")
 		fmt.Println(directory)
 		fmt.Println(viper.Get("directory"))
-		
+
 		schemas(args)
 		// enumerations(args)
 	},

@@ -20,7 +20,7 @@ var cfgFile, path, developer, directory string
 var rootCmd = &cobra.Command{
 	Use:   "cmsutil",
 	Short: "CMS Utility",
-	Long: `A headless CMS utility for interacting with a headless CMS for simple tasks like backup`,
+	Long:  `A headless CMS utility for interacting with a headless CMS for simple tasks like backup`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -61,7 +61,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmsutil/config.yaml)")
 	rootCmd.PersistentFlags().StringVar(&developer, "developer", "Unknown Developer!", "Developer name.")
 	rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Add sub directory in config path")
-	
+
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -99,7 +99,7 @@ func initConfig() {
 
 	// Validate API URL
 	apiUrl := viper.Get("CMS_API_URL")
-	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))	
+	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))
 	if !matched {
 		log.Fatalln("Config setting CMS_API_URL does not contain a valid URL.")
 	}
