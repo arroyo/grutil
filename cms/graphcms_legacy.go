@@ -17,8 +17,18 @@ import (
 	"strings"
 )
 
+// APIResponse struct for output of the V1 API
+type APIResponse struct {
+	Out struct {
+		JsonElements []interface{} `json:"jsonElements"`
+	} `json:"out"`
+	Cursor interface{} `json:"cursor"`
+	IsFull bool        `json:"isFull"`
+	Errors []string    `json:"errors"`
+}
+
 // Make a GraphCMS API call
-func (g *GraphCMS) CallApi(requestBody string, route string) (ApiResponse, error) {
+func (g *GraphCMS) CallApi(requestBody string, route string) (APIResponse, error) {
 	url := fmt.Sprintf("%v/%v", g.url, route)
 	authorization := fmt.Sprintf("Bearer %v", g.key)
 	bodyIoReader := strings.NewReader(requestBody)
@@ -45,7 +55,7 @@ func (g *GraphCMS) CallApi(requestBody string, route string) (ApiResponse, error
 	}
 
 	// Process the response
-	var apiResp ApiResponse
+	var apiResp APIResponse
 	err = json.Unmarshal([]byte(body), &apiResp)
 
 	if apiResp.Errors != nil {

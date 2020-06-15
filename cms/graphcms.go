@@ -33,20 +33,10 @@ type Node struct {
 	Handle   string `json:"handle"`
 }
 
-type ApiResponse struct {
-	Out struct {
-		JsonElements []interface{} `json:"jsonElements"`
-	} `json:"out"`
-	Cursor interface{} `json:"cursor"`
-	IsFull bool        `json:"isFull"`
-	Errors []string    `json:"errors"`
-}
-
 type GraphResponse struct {
 	Data struct {
 		//Type map[string]json.RawMessage `json:"__type"`
-		Type map[string]interface{} `json:"__type"`
-		//Type3 json.RawMessage `json:"__type"`
+		Type   map[string]interface{} `json:"__type"`
 		Schema map[string]interface{} `json:"__schema"`
 	} `json:"data"`
 	Errors []struct {
@@ -64,79 +54,92 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 
 func (g *GraphCMS) GetNodes() []interface{} {
 	// Get Node Types
-	types := g.GetNodeTypes()
-	log.Println("types:")
-	log.Println(types)
+	nodeTypes := g.GetNodeTypes()
+	log.Println("nodeTypes:")
+	log.Println(nodeTypes)
 
-	// Get all fields for each node type
+	var allNodes []interface{}
+
+	// Loop through each node type and pull all content
+	for index := range nodeTypes {
+		nodes := g.GetAllNodesByType(nodeTypes[index])
+		// @todo Aggregate
+		allNodes = append(allNodes, nodes)
+	}
+
+	return allNodes
+}
+
+// GetAllNodesByType will give you all nodes for a given node type.
+// GraphQL does not let you select * like SQL, so we need to take the fields
+// grabbed by introspection and build a graphql query to pull all fields
+// for a given node type (schema model)
+func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
+	// Get all fields for each node type (so we can build a query)
+	fields := g.GetNodeFields(name)
+
+	log.Println("fields:")
+	log.Println(fields)
+
+	// Response field structure
+	type NodeFields struct {
+		Name   string `json:"name"`
+		Kind   string `json:"kind"`
+		Fields []struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Type        struct {
+				Name string `json:"name"`
+				Kind string `json:"kind"`
+			} `json:"type"`
+		}
+	}
+
+	// Build Query
+	// Loop through all fields to build a query
+	var query, fieldsQuery string
+	var nodeFields NodeFields
+	byteData, _ := json.Marshal(fields)
+	err := json.Unmarshal(byteData, &nodeFields)
+
+	// Handle any returned errors
+	if err != nil {
+		log.Fatal("Error processing node field response: \n%v", err)
+	}
+
+	query = `{
+		%v {
+			%v
+		}
+	}`
+	for index := range nodeFields.Fields {
+		// If an object, get id of that object, otherwise just grab the field name
+		if nodeFields.Fields[index].Type.Kind == "OBJECT" ||
+			nodeFields.Fields[index].Name == "documentInStages" {
+			fieldsQuery += fmt.Sprintf(`%v { id } `, nodeFields.Fields[index].Name)
+		} else {
+			fieldsQuery += nodeFields.Fields[index].Name + " "
+		}
+	}
+
+	query = fmt.Sprintf(query, g.Pluralize(name), fieldsQuery)
 
 	// Query all content for each node type
+	log.Println("query: ")
+	log.Println(query)
 
-	// Aggregate and send back for saving
+	allNodes, err := g.CallGraphApi(query, "{}")
 
-	// Old implemenation
-
-	var requestBody string = `{
-		"fileType": "nodes",
-		"cursor": {
-		  "table": 0,
-		  "row": 0,
-		  "field": 0,
-		  "array": 0
-		}
-	  }`
-	nodes, err := g.CallApi(requestBody, "export")
-
-	// Handle any returned errors
 	if err != nil {
-		log.Printf("Error getting nodes from api: \n%v", err)
+		log.Fatalf("Error pulling all %s nodes from API: %v", name, err)
 	}
 
-	return nodes.Out.JsonElements
+	return allNodes.Data
 }
 
-// GetLists will pull the enumerations from GraphCMS
-func (g *GraphCMS) GetLists() []interface{} {
-	var requestBody string = `{
-		"fileType": "lists",
-		"cursor": {
-		  "table": 0,
-		  "row": 0,
-		  "field": 0,
-		  "array": 0
-		}
-	  }`
-	lists, err := g.CallApi(requestBody, "export")
-
-	// Handle any returned errors
-	if err != nil {
-		log.Printf("Error getting lists from api: \n%v", err)
-	}
-
-	// fmt.Println(reflect.TypeOf(lists).String())
-	// fmt.Println(reflect.TypeOf(lists.Out).String())
-
-	return lists.Out.JsonElements
-}
-
-func (g *GraphCMS) GetRelations() []interface{} {
-	var requestBody string = `{
-		"fileType": "relations",
-		"cursor": {
-		  "table": 0,
-		  "row": 0,
-		  "field": 0,
-		  "array": 0
-		}
-	  }`
-	relations, err := g.CallApi(requestBody, "export")
-
-	// Handle any returned errors
-	if err != nil {
-		log.Fatal("Error getting relations from api: \n%v", err)
-	}
-
-	return relations.Out.JsonElements
+// Pluralize will transform the schema model (node type) name to plural
+func (g *GraphCMS) Pluralize(name string) string {
+	return fmt.Sprintf("%ss", strings.ToLower(name))
 }
 
 // Just for debugging the API response
@@ -160,34 +163,65 @@ func (g *GraphCMS) GetNodeTypes() []string {
 		__type(name: "Node") {
 		  possibleTypes {
 			name
-			description
 		  }
 		}
 	}`
 	var requestVars string = `{}`
 	nodeTypes, err := g.CallGraphApi(requestQuery, requestVars)
 
-	log.Println(nodeTypes)
+	// Handle any returned errors
+	if err != nil {
+		log.Fatal("Error getting Node types from GraphCMS API: \n%v", err)
+	}
+
+	type NodeTypesResponse struct {
+		PossibleTypes []struct {
+			Name string `json:"name"`
+		} `json:"possibleTypes"`
+	}
+
+	var nodeTypesResp NodeTypesResponse
+	byteData, _ := json.Marshal(nodeTypes.Data.Type)
+	err = json.Unmarshal(byteData, &nodeTypesResp)
 
 	// Handle any returned errors
 	if err != nil {
-		log.Printf("Error getting Node types from GraphCMS API: \n%v", err)
+		log.Fatal("Error parsing node types from response: \n%v", err)
 	}
 
-	var types []string
-
-	fmt.Println("possibleTypes:")
-
-	foo := nodeTypes.Data.Type["possibleTypes"]
-	fooMap := foo.([]interface{})
-
-	for _, v := range fooMap {
-		vMap := v.(map[string]interface{})
-		fmt.Println(vMap["name"])
-		types = append(types, fmt.Sprintf("%v", vMap["name"]))
+	var allTypes []string
+	for index := range nodeTypesResp.PossibleTypes {
+		allTypes = append(allTypes, nodeTypesResp.PossibleTypes[index].Name)
 	}
 
-	return types
+	return allTypes
+}
+
+// Get a single schema as json
+func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
+	var query = `query Type ($nodetype: String!) {
+		__type(name: $nodetype) {
+		  kind
+		  name
+		  fields {
+			name
+			description
+			type {
+			  name
+			  kind
+			}
+		  }
+		}
+	}`
+	var queryVars = fmt.Sprintf(`{"nodetype":"%s"}`, name)
+
+	nodeFields, err := g.CallGraphApi(query, queryVars)
+
+	if err != nil {
+		log.Fatal("Error getting Node fields from GraphCMS API: \n%v", err)
+	}
+
+	return nodeFields.Data.Type
 }
 
 // Get a single schema as json
@@ -207,7 +241,7 @@ func (g *GraphCMS) GetSchema(name string) string {
 		  }
 		}
 	  }`
-	var queryVars = `{"nodetype":"Blog"}`
+	var queryVars = fmt.Sprintf(`{"nodetype":"%s"}`, name)
 
 	fmt.Println(query)
 	fmt.Println(queryVars)
@@ -215,25 +249,23 @@ func (g *GraphCMS) GetSchema(name string) string {
 	return query
 }
 
-// Get all schemas as json
+// GetSchemas retrives the schema and returns json
 func (g *GraphCMS) GetSchemas() string {
-	log.Println("GetSchemas")
 	nodeTypes := g.GetNodeTypes()
 
 	log.Println("GetSchemas: nodeTypes")
 	log.Println(nodeTypes)
 
-	// Unserialize
-	//var bodyJson interface{}
-	//err := json.Unmarshal(nodeTypes, &bodyJson)
+	var schemas []interface{}
 
-	//for index, _ := range nodeTypes["possibleTypes"] {
-	//	fmt.Println(index)
-	//	fmt.Println(nodeTypes["possibleTypes"][index]["name"])
-	// Call g.GetSchema(schema) for each
-	//}
+	for index, _ := range nodeTypes {
+		// fmt.Println(index)
+		// fmt.Println(nodeTypes[index])
+		schemas = append(schemas, g.GetSchema(nodeTypes[index]))
+	}
 
-	// Return array of json schemas as json as text
+	// @todo Convert Schemas to json and return
+
 	var jsonSchemas = `[{
 		"name": "schema",
 		"complete": "me"
@@ -317,8 +349,7 @@ func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphR
 		log.Fatal("Error reading request. ", err)
 	}
 
-	fmt.Println(requestBody)
-
+	// fmt.Println(requestBody)
 	req.Header.Set("Content-Type", "application/json")
 	// req.Header.Set("Authorization", authorization)
 
@@ -330,7 +361,7 @@ func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphR
 	defer resp.Body.Close()
 
 	// Check status
-	fmt.Println(resp)
+	// fmt.Println(resp)
 	if resp.StatusCode != 200 {
 		log.Fatalf("GraphCMS server error: %v", resp.Status)
 	}
@@ -345,8 +376,8 @@ func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphR
 	err = json.Unmarshal([]byte(body), &apiResp)
 
 	// Debug
-	mapBody(body)
-	fmt.Println(apiResp)
+	// mapBody(body)
+	// fmt.Println(apiResp)
 	//fmt.Println(apiResp.Errors)
 	//fmt.Println(len(apiResp.Errors))
 
@@ -393,14 +424,14 @@ func (g *GraphCMS) DownloadContent() {
 	g.DownloadAssets(data)
 
 	/* Get lists from GraphCMS and write to file */
-	data = g.GetLists()
+	data = g.GetListsV1()
 
 	// Write lists to file
 	g.FileInit(g.path, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	/* Get relations from GraphCMS and write to file */
-	data = g.GetRelations()
+	data = g.GetRelationsV1()
 
 	// Write relations to file
 	g.FileInit(g.path, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
