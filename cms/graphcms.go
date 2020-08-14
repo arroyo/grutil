@@ -34,11 +34,7 @@ type Node struct {
 }
 
 type GraphResponse struct {
-	Data struct {
-		//Type map[string]json.RawMessage `json:"__type"`
-		Type   map[string]interface{} `json:"__type"`
-		Schema map[string]interface{} `json:"__schema"`
-	} `json:"data"`
+	Data   map[string]interface{} `json:"data"`
 	Errors []struct {
 		Message  string        `json:message`
 		Location []interface{} `json:"locations"`
@@ -83,16 +79,18 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 
 	// Response field structure
 	type NodeFields struct {
-		Name   string `json:"name"`
-		Kind   string `json:"kind"`
-		Fields []struct {
-			Name        string `json:"name"`
-			Description string `json:"description"`
-			Type        struct {
-				Name string `json:"name"`
-				Kind string `json:"kind"`
-			} `json:"type"`
-		}
+		Type struct {
+			Name   string `json:"name"`
+			Kind   string `json:"kind"`
+			Fields []struct {
+				Name        string `json:"name"`
+				Description string `json:"description"`
+				Type        struct {
+					Name string `json:"name"`
+					Kind string `json:"kind"`
+				} `json:"type"`
+			}
+		} `json:"__type"`
 	}
 
 	// Build Query
@@ -112,13 +110,13 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 			%v
 		}
 	}`
-	for index := range nodeFields.Fields {
+	for index := range nodeFields.Type.Fields {
 		// If an object, get id of that object, otherwise just grab the field name
-		if nodeFields.Fields[index].Type.Kind == "OBJECT" ||
-			nodeFields.Fields[index].Name == "documentInStages" {
-			fieldsQuery += fmt.Sprintf(`%v { id } `, nodeFields.Fields[index].Name)
+		if nodeFields.Type.Fields[index].Type.Kind == "OBJECT" ||
+			nodeFields.Type.Fields[index].Name == "documentInStages" {
+			fieldsQuery += fmt.Sprintf(`%v { id } `, nodeFields.Type.Fields[index].Name)
 		} else {
-			fieldsQuery += nodeFields.Fields[index].Name + " "
+			fieldsQuery += nodeFields.Type.Fields[index].Name + " "
 		}
 	}
 
@@ -175,13 +173,15 @@ func (g *GraphCMS) GetNodeTypes() []string {
 	}
 
 	type NodeTypesResponse struct {
-		PossibleTypes []struct {
-			Name string `json:"name"`
-		} `json:"possibleTypes"`
+		Type struct {
+			PossibleTypes []struct {
+				Name string `json:"name"`
+			} `json:"possibleTypes"`
+		} `json:"__type"`
 	}
 
 	var nodeTypesResp NodeTypesResponse
-	byteData, _ := json.Marshal(nodeTypes.Data.Type)
+	byteData, _ := json.Marshal(nodeTypes.Data)
 	err = json.Unmarshal(byteData, &nodeTypesResp)
 
 	// Handle any returned errors
@@ -190,8 +190,8 @@ func (g *GraphCMS) GetNodeTypes() []string {
 	}
 
 	var allTypes []string
-	for index := range nodeTypesResp.PossibleTypes {
-		allTypes = append(allTypes, nodeTypesResp.PossibleTypes[index].Name)
+	for index := range nodeTypesResp.Type.PossibleTypes {
+		allTypes = append(allTypes, nodeTypesResp.Type.PossibleTypes[index].Name)
 	}
 
 	return allTypes
@@ -221,7 +221,7 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 		log.Fatal("Error getting Node fields from GraphCMS API: \n%v", err)
 	}
 
-	return nodeFields.Data.Type
+	return nodeFields.Data
 }
 
 // Get a single schema as json
@@ -275,7 +275,7 @@ func (g *GraphCMS) GetSchemas() string {
 }
 
 // Get enumerations from the API using introspection
-func (g *GraphCMS) GetEnumerationNames() interface{} {
+func (g *GraphCMS) GetEnumerationNames() map[string]interface{} {
 	var requestBody string = `query Schema {
 		__type(name: "Node") {
 		  kind
@@ -292,7 +292,7 @@ func (g *GraphCMS) GetEnumerationNames() interface{} {
 		log.Printf("Error getting enumerations from api: \n%v", err)
 	}
 
-	return nodeTypes.Data.Type
+	return nodeTypes.Data
 }
 
 // Get enumerations
@@ -303,7 +303,7 @@ func (g *GraphCMS) GetEnumerations() {
 }
 
 // Get enumeration names from the API using introspection
-func (g *GraphCMS) GetEnumeration(name string) interface{} {
+func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
 	var requestBody string = `query EnumerationValues {
 		__type(name: "%v") {
 		  kind
@@ -322,7 +322,7 @@ func (g *GraphCMS) GetEnumeration(name string) interface{} {
 		log.Printf("Error getting enumerations from api: \n%v", err)
 	}
 
-	return nodeTypes.Data.Type
+	return nodeTypes.Data
 }
 
 // Prep GraphQL query
