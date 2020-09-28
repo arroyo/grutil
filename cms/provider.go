@@ -8,6 +8,7 @@ All CMS implementations should implement this interface.
 
 package cms
 
+// Provider interface
 type Provider interface {
 	GetSchema(name string) string
 	GetSchemas() string

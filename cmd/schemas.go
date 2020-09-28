@@ -44,6 +44,10 @@ func init() {
 // Get the schema and save it to disk
 func schemas(args []string) {
 	var gcms cms.GraphCMS
-	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), path)
-	gcms.GetSchemas()
+	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+	err := gcms.DownloadSchemas()
+
+	if err != nil {
+		fmt.Println("error downloading schemas")
+	}
 }

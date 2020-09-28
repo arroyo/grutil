@@ -41,13 +41,15 @@ type GraphResponse struct {
 	} `json:"errors"`
 }
 
-func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, path string) {
+// Init initialize config
+func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, path interface{}) {
 	g.url = url
 	g.key = key
-	g.path = path
+	g.path = fmt.Sprintf("%v", path)
 	g.stage = fmt.Sprintf("%v", stage)
 }
 
+// GetNodes from the cms
 func (g *GraphCMS) GetNodes() []interface{} {
 	// Get Node Types
 	nodeTypes := g.GetNodeTypes()
@@ -224,8 +226,30 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 	return nodeFields.Data
 }
 
-// Get a single schema as json
-func (g *GraphCMS) GetSchema(name string) string {
+// GetSchema returns a single schema as json
+func (g *GraphCMS) GetSchema(name string) (map[string]interface{}, error) {
+	var schema string
+	var err error
+	query, queryVars := g.GetSchemaQuery(name)
+
+	response, err := g.CallGraphApi(query, queryVars)
+	if err != nil {
+		fmt.Printf("API Failre: %v", err)
+	}
+
+	// Pretty print to screen (debug)
+	buff, err := json.MarshalIndent(response.Data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	schema = fmt.Sprintf("%s", buff)
+	fmt.Printf("Schema: %v", schema)
+
+	return response.Data, err
+}
+
+// GetSchemaQuery returns a GraphQL query
+func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 	var query = `query ($nodetype: String!) {
 		__type(name: $nodetype) {
 		  name
@@ -246,11 +270,11 @@ func (g *GraphCMS) GetSchema(name string) string {
 	fmt.Println(query)
 	fmt.Println(queryVars)
 
-	return query
+	return query, queryVars
 }
 
 // GetSchemas retrives the schema and returns json
-func (g *GraphCMS) GetSchemas() string {
+func (g *GraphCMS) GetSchemas() []interface{} {
 	nodeTypes := g.GetNodeTypes()
 
 	log.Println("GetSchemas: nodeTypes")
@@ -259,22 +283,32 @@ func (g *GraphCMS) GetSchemas() string {
 	var schemas []interface{}
 
 	for index, _ := range nodeTypes {
-		// fmt.Println(index)
-		// fmt.Println(nodeTypes[index])
-		schemas = append(schemas, g.GetSchema(nodeTypes[index]))
+		fmt.Println(index)
+		fmt.Println(nodeTypes[index])
+		schema, err := g.GetSchema(nodeTypes[index])
+		if err != nil {
+			fmt.Printf("error getting %v schema", nodeTypes[index])
+		} else {
+			schemas = append(schemas, schema)
+		}
 	}
 
-	// @todo Convert Schemas to json and return
-
-	var jsonSchemas = `[{
-		"name": "schema",
-		"complete": "me"
-	}]`
-
-	return jsonSchemas
+	return schemas
 }
 
-// Get enumerations from the API using introspection
+// DownloadSchemas into a file
+func (g *GraphCMS) DownloadSchemas() error {
+	var err error
+	schemas := g.GetSchemas()
+
+	// Write nodes to file
+	g.FileInit(g.path, fmt.Sprintf("/schemas/%v/models", g.stage), "0001.json")
+	g.WriteFileJson(schemas)
+
+	return err
+}
+
+// GetEnumerationNames from the API using introspection
 func (g *GraphCMS) GetEnumerationNames() map[string]interface{} {
 	var requestBody string = `query Schema {
 		__type(name: "Node") {
@@ -349,10 +383,7 @@ func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphR
 		log.Fatal("Error reading request. ", err)
 	}
 
-	// fmt.Println(requestBody)
 	req.Header.Set("Content-Type", "application/json")
-	// req.Header.Set("Authorization", authorization)
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
