@@ -300,9 +300,9 @@ func (g *GraphCMS) GetSchemas() []interface{} {
 	return schemas
 }
 
-// GetEnumerationNames from the API using introspection
+// GetAllEnumerations from the API using introspection
 // This returns numerous ENUMS including any system enumerations
-func (g *GraphCMS) GetEnumerationNames() []string {
+func (g *GraphCMS) GetAllEnumerations() []interface{} {
 	var query string = `query SchemaTypes {
 		__schema {
 			types {
@@ -329,6 +329,10 @@ func (g *GraphCMS) GetEnumerationNames() []string {
 				Name string `json:"name"`
 				Kind string `json:"kind"`
 				Description string `json:"description"`
+				EnumValues []struct {
+					Name string `json:"name"`
+					Description string `json:"description"`
+				} `json:"enumValues"`
 			} `json:"types"`
 		} `json:"__schema"`
 	}
@@ -342,10 +346,10 @@ func (g *GraphCMS) GetEnumerationNames() []string {
 		log.Fatal("Error parsing schema types from response: \n%v", err)
 	}
 
-	var allTypes []string
+	var allTypes []interface{}
 	for _, schemaType := range schemaTypes.Schema.Types {
 		if schemaType.Kind == "ENUM" {
-			allTypes = append(allTypes, schemaType.Name)
+			allTypes = append(allTypes, schemaType)
 		}
 	}
 
@@ -354,6 +358,7 @@ func (g *GraphCMS) GetEnumerationNames() []string {
 
 
 // GetAllEnumerations from the CMS, including system ENUMS
+/*
 func (g *GraphCMS) GetAllEnumerations() []interface{} {	
 	names := g.GetEnumerationNames()
 	var enums []interface{}
@@ -365,6 +370,7 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 
 	return enums
 }
+*/
 
 // GetEnumerations from the CMS based on enumerations defined in your config
 func (g *GraphCMS) GetEnumerations() []interface{} {
