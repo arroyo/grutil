@@ -16,8 +16,11 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
+// GraphCMS struct
 type GraphCMS struct {
 	File
 	url       interface{}
@@ -27,12 +30,14 @@ type GraphCMS struct {
 	stage     string
 }
 
+// Node content node
 type Node struct {
 	TypeName string `json:"_typeName"`
-	Id       string `json:"id"`
+	ID       string `json:"id"`
 	Handle   string `json:"handle"`
 }
 
+// GraphResponse GraphCMS API response
 type GraphResponse struct {
 	Data   map[string]interface{} `json:"data"`
 	Errors []struct {
@@ -128,7 +133,7 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	log.Println("query: ")
 	log.Println(query)
 
-	allNodes, err := g.CallGraphApi(query, "{}")
+	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
 		log.Fatalf("Error pulling all %s nodes from API: %v", name, err)
@@ -167,7 +172,7 @@ func (g *GraphCMS) GetNodeTypes() []string {
 		}
 	}`
 	var requestVars string = `{}`
-	nodeTypes, err := g.CallGraphApi(requestQuery, requestVars)
+	nodeTypes, err := g.CallGraphAPI(requestQuery, requestVars)
 
 	// Handle any returned errors
 	if err != nil {
@@ -199,7 +204,7 @@ func (g *GraphCMS) GetNodeTypes() []string {
 	return allTypes
 }
 
-// Get a single schema as json
+// GetNodeFields returns a single schema as json
 func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 	var query = `query Type ($nodetype: String!) {
 		__type(name: $nodetype) {
@@ -216,8 +221,7 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 		}
 	}`
 	var queryVars = fmt.Sprintf(`{"nodetype":"%s"}`, name)
-
-	nodeFields, err := g.CallGraphApi(query, queryVars)
+	nodeFields, err := g.CallGraphAPI(query, queryVars)
 
 	if err != nil {
 		log.Fatal("Error getting Node fields from GraphCMS API: \n%v", err)
@@ -232,7 +236,7 @@ func (g *GraphCMS) GetSchema(name string) (map[string]interface{}, error) {
 	var err error
 	query, queryVars := g.GetSchemaQuery(name)
 
-	response, err := g.CallGraphApi(query, queryVars)
+	response, err := g.CallGraphAPI(query, queryVars)
 	if err != nil {
 		fmt.Printf("API Failre: %v", err)
 	}
@@ -296,49 +300,92 @@ func (g *GraphCMS) GetSchemas() []interface{} {
 	return schemas
 }
 
-// DownloadSchemas into a file
-func (g *GraphCMS) DownloadSchemas() error {
-	var err error
-	schemas := g.GetSchemas()
-
-	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/schemas/%v/models", g.stage), "0001.json")
-	g.WriteFileJson(schemas)
-
-	return err
-}
-
 // GetEnumerationNames from the API using introspection
-func (g *GraphCMS) GetEnumerationNames() map[string]interface{} {
-	var requestBody string = `query Schema {
-		__type(name: "Node") {
-		  kind
-		  name
-		  possibleTypes {
-			  name
-			}
+// This returns numerous ENUMS including any system enumerations
+func (g *GraphCMS) GetEnumerationNames() []string {
+	var query string = `query SchemaTypes {
+		__schema {
+			types {
+				name
+				kind
+				description
+				enumValues {
+					name
+					description
+				}
+		  	}
 		}
-	  }`
-	nodeTypes, err := g.CallGraphApi(requestBody, "{}")
+	}`
+	schemaTypesResp, err := g.CallGraphAPI(query, "{}")
 
 	// Handle any returned errors
 	if err != nil {
 		log.Printf("Error getting enumerations from api: \n%v", err)
 	}
 
-	return nodeTypes.Data
+	type SchemaTypes struct {
+		Schema struct {
+			Types []struct {
+				Name string `json:"name"`
+				Kind string `json:"kind"`
+				Description string `json:"description"`
+			} `json:"types"`
+		} `json:"__schema"`
+	}
+
+	var schemaTypes SchemaTypes
+	byteData, _ := json.Marshal(schemaTypesResp.Data)
+	err = json.Unmarshal(byteData, &schemaTypes)
+
+	// Handle any returned errors
+	if err != nil {
+		log.Fatal("Error parsing schema types from response: \n%v", err)
+	}
+
+	var allTypes []string
+	for _, schemaType := range schemaTypes.Schema.Types {
+		if schemaType.Kind == "ENUM" {
+			allTypes = append(allTypes, schemaType.Name)
+		}
+	}
+
+	return allTypes
 }
 
-// Get enumerations
-func (g *GraphCMS) GetEnumerations() {
-	// GetEnumerationNames()
-	enums := g.GetEnumeration("Tags")
+
+// GetAllEnumerations from the CMS, including system ENUMS
+func (g *GraphCMS) GetAllEnumerations() []interface{} {	
+	names := g.GetEnumerationNames()
+	var enums []interface{}
+
+	for _, name := range names {
+		enum := g.GetEnumeration(name)
+		enums = append(enums, enum)
+	}
+
+	return enums
+}
+
+// GetEnumerations from the CMS based on enumerations defined in your config
+func (g *GraphCMS) GetEnumerations() []interface{} {
+	var enums []interface{}
+	enumConfig := viper.GetStringSlice("backups.enumerations")
+
+	fmt.Println(enumConfig)
+	
+	for _, name := range enumConfig {
+		enum := g.GetEnumeration(name)
+		enums = append(enums, enum)
+	}
+
 	log.Println(enums)
+
+	return enums
 }
 
-// Get enumeration names from the API using introspection
+// GetEnumeration get a single enumeration by name from the API using introspection
 func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
-	var requestBody string = `query EnumerationValues {
+	var query string = `query EnumerationValues {
 		__type(name: "%v") {
 		  kind
 		  name
@@ -349,7 +396,7 @@ func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
 		  }
 		}
 	  }`
-	nodeTypes, err := g.CallGraphApi(requestBody, "{}")
+	nodeTypes, err := g.CallGraphAPI(fmt.Sprintf(query, name), "{}")
 
 	// Handle any returned errors
 	if err != nil {
@@ -371,8 +418,8 @@ func (g *GraphCMS) formatQuery(query string) string {
 	return query
 }
 
-// Make a GraphQL API call requestQuery, requestVars
-func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphResponse, error) {
+// CallGraphAPI to make a GraphQL API call with requestQuery & requestVars
+func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphResponse, error) {
 	var url string = fmt.Sprintf("%v", g.url)
 	requestBody := fmt.Sprintf(`{"query":"%v","variables":%v}`, g.formatQuery(requestQuery), requestVars)
 	// authorization := fmt.Sprintf("Bearer %v", g.key)
@@ -419,7 +466,43 @@ func (g *GraphCMS) CallGraphApi(requestQuery string, requestVars string) (GraphR
 	return apiResp, err
 }
 
-// Loop through nodes, look for assets and download
+// DownloadSchemas to a file
+func (g *GraphCMS) DownloadSchemas() error {
+	var err error
+	schemas := g.GetSchemas()
+
+	// Write nodes to file
+	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/models", g.stage), "0001.json")
+	g.WriteFileJson(schemas)
+
+	return err
+}
+
+// DownloadEnumerations to a file
+func (g *GraphCMS) DownloadEnumerations() error {
+	var err error
+	enums := g.GetEnumerations()
+
+	// Write nodes to file
+	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "select.json")
+	g.WriteFileJson(enums)
+
+	return err
+}
+
+// DownloadAllEnumerations to a file
+func (g *GraphCMS) DownloadAllEnumerations() error {
+	var err error
+	enums := g.GetAllEnumerations()
+
+	// Write nodes to file
+	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "all.json")
+	g.WriteFileJson(enums)
+
+	return err
+}
+
+// DownloadAssets loop through nodes, look for assets and download
 func (g *GraphCMS) DownloadAssets(data []interface{}) {
 	g.Folder = "/assets"
 	var node Node
@@ -442,6 +525,7 @@ func (g *GraphCMS) DownloadAssets(data []interface{}) {
 	}
 }
 
+// DownloadContent from the GraphCMS
 func (g *GraphCMS) DownloadContent() {
 	/* Get nodes from GraphCMS and write to file */
 	data := g.GetNodes()
