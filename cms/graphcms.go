@@ -478,7 +478,7 @@ func (g *GraphCMS) DownloadSchemas() error {
 	schemas := g.GetSchemas()
 
 	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/models", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/models", g.stage), "nodes.json")
 	g.WriteFileJson(schemas)
 
 	return err
@@ -537,7 +537,7 @@ func (g *GraphCMS) DownloadContent() {
 	data := g.GetNodes()
 
 	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/content/%v/nodes", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/%v/content/nodes", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	// Download all assets into the assets folder
@@ -548,13 +548,13 @@ func (g *GraphCMS) DownloadContent() {
 	data = g.GetListsV1()
 
 	// Write lists to file
-	g.FileInit(g.path, fmt.Sprintf("/content/%v/lists", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/%v/content/lists", g.stage), "0001.json")
 	g.WriteFileJson(data)
 
 	/* Get relations from GraphCMS and write to file */
 	data = g.GetRelationsV1()
 
 	// Write relations to file
-	g.FileInit(g.path, fmt.Sprintf("/content/%v/relations", g.stage), "0001.json")
+	g.FileInit(g.path, fmt.Sprintf("/%v/content/relations", g.stage), "0001.json")
 	g.WriteFileJson(data)
 }
