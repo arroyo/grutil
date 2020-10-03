@@ -1,12 +1,12 @@
 /*
 Copyright © 2020 John Arroyo
 
-cms File package
+storage File package
 
 write retrieved data to a file
 */
 
-package cms
+package storage
 
 import (
 	"encoding/json"
@@ -17,13 +17,15 @@ import (
 	"os"
 )
 
+// File interactions
 type File struct {
 	Path     string
 	Folder   string
 	Filename string
 }
 
-func (f *File) FileInit(path string, folder string, filename string) {
+// Init initialize File
+func (f *File) Init(path string, folder string, filename string) {
 	f.Path = path
 	f.Folder = folder
 	f.Filename = filename
@@ -42,11 +44,11 @@ func prepFolder(folder string) {
 	}
 }
 
-// Write the supplied json data to a file.
+// WriteFileJSON write the supplied json data to a file.
 // Full filepath comes from the vars in the struct
 // Path + Folder + Filename
 // Path & Folder can be empty, but filename cannot be
-func (f *File) WriteFileJson(data []interface{}) {
+func (f *File) WriteFileJSON(data []interface{}) {
 	// @todo check if folder empty?
 	// @todo make sure filepath is not empty
 	var fullpath = fmt.Sprintf("%v%v", f.Path, f.Folder)
@@ -68,7 +70,7 @@ func (f *File) WriteFileJson(data []interface{}) {
 	file.Close()
 }
 
-// Write the supplied data string to a file.
+// WriteFile write the supplied data string to a file.
 // Full filepath comes from the vars in the struct
 // Path + Folder + Filename
 // Path & Folder can be empty, but filename cannot be
@@ -90,6 +92,7 @@ func (f *File) WriteFile(data string) {
 	file.Close()
 }
 
+// DownloadFile from URL
 func (f *File) DownloadFile(url string, filename string) error {
 	fmt.Println("Download file " + url)
 

@@ -6,23 +6,18 @@ cms graphcms package
 Get and download schemas and content from GraphCMS
 */
 
-package cms
+package graphcms
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"reflect"
-	"strings"
 
 	"github.com/spf13/viper"
 )
 
 // GraphCMS struct
 type GraphCMS struct {
-	File
 	url       interface{}
 	key       interface{}
 	path      string
@@ -140,26 +135,6 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	}
 
 	return allNodes.Data
-}
-
-// Pluralize will transform the schema model (node type) name to plural
-func (g *GraphCMS) Pluralize(name string) string {
-	return fmt.Sprintf("%ss", strings.ToLower(name))
-}
-
-// Just for debugging the API response
-func mapBody(body []uint8) error {
-	fmt.Println(string(body))
-	fmt.Println(reflect.TypeOf(body).String())
-
-	// Unserialize
-	var bodyJson interface{}
-	err := json.Unmarshal([]byte(body), &bodyJson)
-
-	fmt.Println(bodyJson)
-	fmt.Println(reflect.TypeOf(bodyJson).String())
-
-	return err
 }
 
 // GetNodeTypes will get node types from the API using introspection
@@ -410,151 +385,4 @@ func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
 	}
 
 	return nodeTypes.Data
-}
-
-// Prep GraphQL query
-func (g *GraphCMS) formatQuery(query string) string {
-	// replace new lines with a space
-	query = strings.ReplaceAll(query, "\n", " ")
-	// escape any double quotes
-	query = strings.ReplaceAll(query, "\"", "\\\"")
-	// Remove any tabs
-	query = strings.ReplaceAll(query, "\t", "")
-
-	return query
-}
-
-// CallGraphAPI to make a GraphQL API call with requestQuery & requestVars
-func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphResponse, error) {
-	var url string = fmt.Sprintf("%v", g.url)
-	requestBody := fmt.Sprintf(`{"query":"%v","variables":%v}`, g.formatQuery(requestQuery), requestVars)
-	// authorization := fmt.Sprintf("Bearer %v", g.key)
-	bodyIoReader := strings.NewReader(requestBody)
-
-	req, err := http.NewRequest("POST", url, bodyIoReader)
-	if err != nil {
-		log.Fatal("Error reading request. ", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer resp.Body.Close()
-
-	// Check status
-	// fmt.Println(resp)
-	if resp.StatusCode != 200 {
-		log.Fatalf("GraphCMS server error: %v", resp.Status)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// Process the response
-	var apiResp GraphResponse
-	err = json.Unmarshal([]byte(body), &apiResp)
-
-	// Debug
-	// mapBody(body)
-	// fmt.Println(apiResp)
-	//fmt.Println(apiResp.Errors)
-	//fmt.Println(len(apiResp.Errors))
-
-	if len(apiResp.Errors) > 0 {
-		log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0].Message)
-	}
-
-	return apiResp, err
-}
-
-// DownloadSchemas to a file
-func (g *GraphCMS) DownloadSchemas() error {
-	var err error
-	schemas := g.GetSchemas()
-
-	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/models", g.stage), "nodes.json")
-	g.WriteFileJson(schemas)
-
-	return err
-}
-
-// DownloadEnumerations to a file
-func (g *GraphCMS) DownloadEnumerations() error {
-	var err error
-	enums := g.GetEnumerations()
-
-	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "select.json")
-	g.WriteFileJson(enums)
-
-	return err
-}
-
-// DownloadAllEnumerations to a file
-func (g *GraphCMS) DownloadAllEnumerations() error {
-	var err error
-	enums := g.GetAllEnumerations()
-
-	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "all.json")
-	g.WriteFileJson(enums)
-
-	return err
-}
-
-// DownloadAssets loop through nodes, look for assets and download
-func (g *GraphCMS) DownloadAssets(data []interface{}) {
-	g.Folder = "/assets"
-	var node Node
-
-	// Loop through nodes, find assets and download them
-	for index, _ := range data {
-		byteData, _ := json.Marshal(data[index])
-		err := json.Unmarshal(byteData, &node)
-		if err != nil {
-			panic(err)
-		}
-
-		if node.TypeName == "Asset" {
-			url := fmt.Sprintf("https://media.graphcms.com/%v", node.Handle)
-			err = g.DownloadFile(url, node.Handle)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-}
-
-// DownloadContent from the GraphCMS
-func (g *GraphCMS) DownloadContent() {
-	/* Get nodes from GraphCMS and write to file */
-	data := g.GetNodes()
-
-	// Write nodes to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/content/nodes", g.stage), "0001.json")
-	g.WriteFileJson(data)
-
-	// Download all assets into the assets folder
-	g.Folder = "/assets"
-	g.DownloadAssets(data)
-
-	/* Get lists from GraphCMS and write to file */
-	data = g.GetListsV1()
-
-	// Write lists to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/content/lists", g.stage), "0001.json")
-	g.WriteFileJson(data)
-
-	/* Get relations from GraphCMS and write to file */
-	data = g.GetRelationsV1()
-
-	// Write relations to file
-	g.FileInit(g.path, fmt.Sprintf("/%v/content/relations", g.stage), "0001.json")
-	g.WriteFileJson(data)
 }

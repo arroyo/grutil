@@ -1,7 +1,7 @@
 version: '1.0'
 
 cms:
-    provider: GraphCMS
+    provider: graphcms.GraphCMS
 
 backups:
     path: /Users/arroyo/.cmsutil/backups

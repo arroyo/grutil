@@ -4,7 +4,7 @@ Copyright © 2020 John Arroyo
 package cmd
 
 import (
-	"github.com/arroyo/cmsutil/cms"
+	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,7 +40,7 @@ func init() {
 
 // Get the schema and save it to disk
 func enumerations(args []string) {
-	var gcms cms.GraphCMS
+	var gcms graphcms.GraphCMS
 	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
 	gcms.DownloadEnumerations()
 	gcms.DownloadAllEnumerations()
