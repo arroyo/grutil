@@ -26,6 +26,7 @@ var rootCmd = &cobra.Command{
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+// Config structure
 type Config struct {
 	Version string
 	Cms     struct {
@@ -98,8 +99,8 @@ func initConfig() {
 	// viper.Set("cms.host", "set override in code") // Example override
 
 	// Validate API URL
-	apiUrl := viper.Get("CMS_API_URL")
-	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiUrl))
+	apiURL := viper.Get("CMS_API_URL")
+	matched, err := regexp.MatchString(`^http[s]?:\/\/`, fmt.Sprintf("%v", apiURL))
 	if !matched {
 		log.Fatalln("Config setting CMS_API_URL does not contain a valid URL.")
 	}

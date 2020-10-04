@@ -1,4 +1,6 @@
 /*
+Package cmd download schemas
+
 Copyright © 2020 John Arroyo
 */
 package cmd

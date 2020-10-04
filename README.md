@@ -2,7 +2,7 @@
 
 Headless CMS CLI Utility
 
-*Pre-Alpha*
+**Pre-Alpha** latest implementation not ready for use just yet.
 
 Log any issues to Github issues.
 
@@ -32,24 +32,25 @@ Get a copy of your schema or content with the download command. Backup your enti
 
 Download schema models and enumerations
 
-```
+```shell-script
 cmsutil download schemas
 ```
 
 Download node content and assets
-```
+
+```shell-script
 cmsutil download content
 ```
 
 Backup your site
 
-```
+```shell-script
 cmsutil backup
 ```
 
 Get general help or help with a specific command using.
 
-```
+```shell-script
 cmsutil help
 cmsutil download -h
 ```
