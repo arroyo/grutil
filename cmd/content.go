@@ -4,13 +4,15 @@ Copyright © 2020 John Arroyo
 package cmd
 
 import (
+	"fmt"
+	
 	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // backupCmd represents the backup command
-var enumerationsCmd = &cobra.Command{
+var contentCmd = &cobra.Command{
 	Use:   "enumerations",
 	Short: "Backup enumerations to a json file.",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -20,12 +22,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		enumerations(args)
+		fmt.Println("Download content")
+
+		var gcms graphcms.GraphCMS
+		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
 	},
 }
 
 func init() {
-	backupCmd.AddCommand(enumerationsCmd)
+	downloadCmd.AddCommand(contentCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -38,10 +43,3 @@ func init() {
 	// backupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// Get the schema and save it to disk
-func enumerations(args []string) {
-	var gcms graphcms.GraphCMS
-	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-	gcms.DownloadEnumerations()
-	gcms.DownloadAllEnumerations()
-}
