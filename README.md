@@ -1,8 +1,8 @@
 # cmsutil
 
-Headless CMS CLI
+Headless CMS CLI Utility
 
-*Alpha*
+*Pre-Alpha*
 
 Log any issues to Github issues.
 
@@ -28,11 +28,23 @@ CMS_API_KEY
 
 ## Usage
 
-Backup your content with the download command.  Optionally add a sub folder name after the download command.
+Get a copy of your schema or content with the download command. Backup your entire project with the backup command.
+
+Download schema models and enumerations
 
 ```
-cmsutil download
-cmsutil download myfolder
+cmsutil download schemas
+```
+
+Download node content and assets
+```
+cmsutil download content
+```
+
+Backup your site
+
+```
+cmsutil backup
 ```
 
 Get general help or help with a specific command using.
