@@ -11,6 +11,7 @@ package graphcms
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/arroyo/cmsutil/storage"
 )
@@ -24,8 +25,23 @@ func (g *GraphCMS) WriteFileJSON(data []interface{}, folder string, filename str
 	return
 }
 
-// DownloadSchemas to a file
+// DownloadSchemas to a file.  Download both models and enumerations.
 func (g *GraphCMS) DownloadSchemas() error {
+	err := g.DownloadModels()
+	if err != nil {
+		log.Fatalf("failed to download model schemas: %v", err)
+	}
+
+	err = g.DownloadEnumerations()
+	if err != nil {
+		log.Fatalf("failed to download enumeration schemas: %v", err)
+	}
+
+	return err
+}
+
+// DownloadModels to a file
+func (g *GraphCMS) DownloadModels() error {
 	var err error
 	schemas := g.GetSchemas()
 

@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -20,11 +21,10 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Back up directory: ")
-		fmt.Println(viper.Get("backups.path"))
-
-		schemas(args)
-		// enumerations(args)
+		fmt.Println("Back up schemas and content ")
+		
+		var gcms graphcms.GraphCMS
+		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
 	},
 }
 
