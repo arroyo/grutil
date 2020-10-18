@@ -68,6 +68,29 @@ func (g *GraphCMS) GetNodes() []interface{} {
 	return allNodes
 }
 
+// subfieldFormat will apply special rules to handle fields that both 
+// can and cannot be accounted for based on introspection.
+func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
+	format := ""
+
+	if len(field.Args) > 1 {
+		return field.Name + " { id }\n"
+	}
+
+	// rgba is a normalized field with no distinguisging introspection data
+	// distance is based on a map input field that is irrelavant for a backup
+	switch field.Name {
+	case "rgba":
+		format = "rgba { r g b a }\n"
+	case "distance":
+		format = ""
+	default:
+		format = field.Name + "\n"
+	}
+
+	return format
+}
+
 // GetAllNodesByType will give you all nodes for a given node type.
 // GraphQL does not let you select * like SQL, so we need to take the fields
 // grabbed by introspection and build a graphql query to pull all fields
@@ -76,25 +99,6 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	// Get all fields for each node type (so we can build a query)
 	fields := g.GetNodeFields(name)
 
-	log.Println("fields:")
-	log.Println(fields)
-
-	// Response field structure
-	type NodeFields struct {
-		Type struct {
-			Name   string `json:"name"`
-			Kind   string `json:"kind"`
-			Fields []struct {
-				Name        string `json:"name"`
-				Description string `json:"description"`
-				Type        struct {
-					Name string `json:"name"`
-					Kind string `json:"kind"`
-				} `json:"type"`
-			}
-		} `json:"__type"`
-	}
-
 	// Build Query
 	// Loop through all fields to build a query
 	var query, fieldsQuery string
@@ -102,23 +106,35 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	byteData, _ := json.Marshal(fields)
 	err := json.Unmarshal(byteData, &nodeFields)
 
+	log.Printf("Fields for schema %v:", name)
+	log.Println(nodeFields)
+
 	// Handle any returned errors
 	if err != nil {
-		log.Fatal("Error processing node field response: \n%v", err)
+		log.Fatal("error processing node fields: \n%v", err)
 	}
 
-	query = `{
+	// Query builder, create GraphQL query to pull all nodes and content fields
+	query = `query {
 		%v {
 			%v
 		}
 	}`
 	for index := range nodeFields.Type.Fields {
+		// Debug
+		log.Printf("name: %v, fields: %v, args: %v", nodeFields.Type.Fields[index].Name, len(nodeFields.Type.Fields[index].Type.Fields), len(nodeFields.Type.Fields[index].Args))
+		
 		// If an object, get id of that object, otherwise just grab the field name
-		if nodeFields.Type.Fields[index].Type.Kind == "OBJECT" ||
-			nodeFields.Type.Fields[index].Name == "documentInStages" {
-			fieldsQuery += fmt.Sprintf(`%v { id } `, nodeFields.Type.Fields[index].Name)
+		if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
+			fields := ""
+			for _, field := range nodeFields.Type.Fields[index].Type.Fields {
+				fields += g.subfieldFormat(field)
+			}
+			fieldsQuery += fmt.Sprintf("%v { %v } \n", nodeFields.Type.Fields[index].Name, fields)
+		} else if len(nodeFields.Type.Fields[index].Args) > 1 {
+			fieldsQuery += fmt.Sprintf("%v { id } \n", nodeFields.Type.Fields[index].Name)
 		} else {
-			fieldsQuery += nodeFields.Type.Fields[index].Name + " "
+			fieldsQuery += nodeFields.Type.Fields[index].Name + "\n"
 		}
 	}
 
@@ -179,22 +195,93 @@ func (g *GraphCMS) GetNodeTypes() []string {
 	return allTypes
 }
 
+// NodeSubfield structure
+type NodeSubfield struct {
+	Name string `json:"name"`
+	Description string `json:"description"`
+	Args []struct {
+		Name string `json:"name"`
+		Description string `json:"description"`
+		DefaultValue string `json:"defaultValue"`
+	} `json:"args"`
+}
+
+// NodeFields structure
+type NodeFields struct {
+	Type struct {
+		Name   string `json:"name"`
+		Kind   string `json:"kind"`
+		Fields []struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Args []struct {
+				Name string `json:"name"`
+				Description string `json:"description"`
+			  	DefaultValue string `json:"defaultValue"`
+			} `json:"args"`
+			Type struct {
+				Name string `json:"name"`
+				Kind string `json:"kind"`
+				Description string `json:"description"`
+				Fields []NodeSubfield `json:"fields"`
+			  	OfType struct {
+					Name string `json:"name"`
+					Description string `json:"description"`
+			  	}`json:"ofType"`
+			  	Interfaces []struct {
+					Name string `json:"name"`
+					Description string `json:"description"`
+					Typename string `json:"__typename"`
+			  	} `json:"interfaces"`
+			} `json:"type"`
+		} `json:"fields"`
+	} `json:"__type"`
+}
+
 // GetNodeFields returns a single schema as json
 func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
-	var query = `query Type ($nodetype: String!) {
+	var query = `query GetNodeByTypeVerbose($nodetype: String!) {
 		__type(name: $nodetype) {
-		  kind
 		  name
+		  kind
 		  fields {
 			name
 			description
+			args {
+			  name
+			  description
+			  defaultValue
+			}
 			type {
 			  name
 			  kind
+			  description
+			  fields {
+				name
+				description
+				args {
+					name
+					description
+					defaultValue
+				}
+			  }
+			  possibleTypes {
+				name
+				description
+			  }
+			  ofType {
+				name
+				description
+			  }
+			  interfaces {
+				name
+				description
+				__typename
+			  }
 			}
 		  }
 		}
-	}`
+	  }`
 	var queryVars = fmt.Sprintf(`{"nodetype":"%s"}`, name)
 	nodeFields, err := g.CallGraphAPI(query, queryVars)
 

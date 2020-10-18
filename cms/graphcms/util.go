@@ -16,6 +16,7 @@ import (
 )
 
 // Pluralize will transform the schema model (node type) name to plural
+// @note this is a dumb implementation and will need to be augmented later
 func (g *GraphCMS) Pluralize(name string) string {
 	return fmt.Sprintf("%ss", strings.ToLower(name))
 }

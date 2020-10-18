@@ -28,6 +28,7 @@ to quickly create a Cobra application.`,
 
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+		gcms.DownloadContent()
 	},
 }
 
