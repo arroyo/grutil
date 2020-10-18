@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -23,6 +24,7 @@ type GraphCMS struct {
 	path      string
 	structure map[string]string
 	stage     string
+	NodeTypes []string
 }
 
 // Node content node
@@ -51,17 +53,15 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 
 // GetNodes from the cms
 func (g *GraphCMS) GetNodes() []interface{} {
-	// Get Node Types
-	nodeTypes := g.GetNodeTypes()
-	log.Println("nodeTypes:")
-	log.Println(nodeTypes)
-
+	// Get Node Types, loop through each type and then pull all content
+	g.NodeTypes = g.GetNodeTypes()
 	var allNodes []interface{}
+	
+	log.Println("NodeTypes:")
+	log.Println(g.NodeTypes)
 
-	// Loop through each node type and pull all content
-	for index := range nodeTypes {
-		nodes := g.GetAllNodesByType(nodeTypes[index])
-		// @todo Aggregate
+	for index := range g.NodeTypes {
+		nodes := g.GetAllNodesByType(g.NodeTypes[index])
 		allNodes = append(allNodes, nodes)
 	}
 
@@ -86,9 +86,25 @@ func (g *GraphCMS) subfieldException(name string) string {
 	return format
 }
 
+// IsNodeType check to see if name is listed as one of the node types
+func (g *GraphCMS) IsNodeType(name string) bool {
+	for _, nodeType := range g.NodeTypes {
+		if strings.ToLower(name) == strings.ToLower(nodeType) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // subfieldFormat will apply special rules to handle fields that both 
 // can and cannot be accounted for based on introspection.
 func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
+	// To avoid recursive nesting, check for one of the known schema types and simply add an id if a match
+	if g.IsNodeType(field.Name) {
+		return field.Name + " { id }\n"
+	}
+
 	if len(field.Type.Fields) > 0 {
 		subfields := ""
 		for _, f := range field.Type.Fields {
@@ -378,19 +394,19 @@ func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 
 // GetSchemas retrives the schema and returns json
 func (g *GraphCMS) GetSchemas() []interface{} {
-	nodeTypes := g.GetNodeTypes()
+	g.NodeTypes = g.GetNodeTypes()
 
-	log.Println("GetSchemas: nodeTypes")
-	log.Println(nodeTypes)
+	log.Println("GetSchemas: NodeTypes")
+	log.Println(g.NodeTypes)
 
 	var schemas []interface{}
 
-	for index, _ := range nodeTypes {
+	for index := range g.NodeTypes {
 		fmt.Println(index)
-		fmt.Println(nodeTypes[index])
-		schema, err := g.GetSchema(nodeTypes[index])
+		fmt.Println(g.NodeTypes[index])
+		schema, err := g.GetSchema(g.NodeTypes[index])
 		if err != nil {
-			fmt.Printf("error getting %v schema", nodeTypes[index])
+			fmt.Printf("error getting %v schema", g.NodeTypes[index])
 		} else {
 			schemas = append(schemas, schema)
 		}
