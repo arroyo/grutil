@@ -30,14 +30,15 @@ type GraphResponse struct {
 func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphResponse, error) {
 	var url string = fmt.Sprintf("%v", g.url)
 	requestBody := fmt.Sprintf(`{"query":"%v","variables":%v}`, g.formatQuery(requestQuery), requestVars)
-	// authorization := fmt.Sprintf("Bearer %v", g.key)
+	authorization := fmt.Sprintf("Bearer %v", g.key)
 	bodyIoReader := strings.NewReader(requestBody)
 
 	req, err := http.NewRequest("POST", url, bodyIoReader)
 	if err != nil {
-		log.Fatal("Error reading request. ", err)
+		log.Fatal("error creating API request. ", err)
 	}
 
+	req.Header.Add("Authorization", authorization)
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -47,7 +48,6 @@ func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphR
 	defer resp.Body.Close()
 
 	// Check status
-	// fmt.Println(resp)
 	if resp.StatusCode != 200 {
 		log.Fatalf("GraphCMS server error: %v", resp.Status)
 	}

@@ -130,12 +130,9 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	byteData, _ := json.Marshal(fields)
 	err := json.Unmarshal(byteData, &nodeFields)
 
-	log.Printf("Fields for schema %v:", name)
-	log.Println(nodeFields)
-
 	// Handle any returned errors
 	if err != nil {
-		log.Fatal("error processing node fields: \n%v", err)
+		log.Fatalf("error processing node fields: \n%v", err)
 	}
 
 	// Query builder, create GraphQL query to pull all nodes and content fields
@@ -166,13 +163,8 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
-		log.Fatalf("Error pulling all %s nodes from API: %v", name, err)
+		log.Fatalf("error pulling all %s nodes from API: %v", name, err)
 	}
-
-	// Query all content for each node type
-	log.Println("query: ")
-	log.Println(query)
-	log.Println(allNodes.Data)
 
 	return allNodes.Data
 }
@@ -191,7 +183,7 @@ func (g *GraphCMS) GetNodeTypes() []string {
 
 	// Handle any returned errors
 	if err != nil {
-		log.Fatal("Error getting Node types from GraphCMS API: \n%v", err)
+		log.Fatal("error getting Node types from GraphCMS API: \n%v", err)
 	}
 
 	type NodeTypesResponse struct {
@@ -208,7 +200,7 @@ func (g *GraphCMS) GetNodeTypes() []string {
 
 	// Handle any returned errors
 	if err != nil {
-		log.Fatal("Error parsing node types from response: \n%v", err)
+		log.Fatal("error parsing node types from response: \n%v", err)
 	}
 
 	var allTypes []string
@@ -330,7 +322,7 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 	nodeFields, err := g.CallGraphAPI(query, queryVars)
 
 	if err != nil {
-		log.Fatal("Error getting Node fields from GraphCMS API: \n%v", err)
+		log.Fatal("error getting Node fields from GraphCMS API: \n%v", err)
 	}
 
 	return nodeFields.Data
@@ -387,7 +379,7 @@ func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 func (g *GraphCMS) GetSchemas() []interface{} {
 	g.NodeTypes = g.GetNodeTypes()
 
-	log.Println("GetSchemas: NodeTypes")
+	log.Println("NodeTypes: ")
 	log.Println(g.NodeTypes)
 
 	var schemas []interface{}
@@ -426,7 +418,7 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 
 	// Handle any returned errors
 	if err != nil {
-		log.Printf("Error getting enumerations from api: \n%v", err)
+		log.Printf("error getting enumerations from api: \n%v", err)
 	}
 
 	type SchemaTypes struct {
@@ -449,7 +441,7 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 
 	// Handle any returned errors
 	if err != nil {
-		log.Fatal("Error parsing schema types from response: \n%v", err)
+		log.Fatal("error parsing schema types from response: \n%v", err)
 	}
 
 	var allTypes []interface{}
@@ -489,8 +481,6 @@ func (g *GraphCMS) GetEnumerations() []interface{} {
 		enums = append(enums, enum)
 	}
 
-	log.Println(enums)
-
 	return enums
 }
 
@@ -511,7 +501,7 @@ func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
 
 	// Handle any returned errors
 	if err != nil {
-		log.Printf("Error getting enumerations from api: \n%v", err)
+		log.Printf("error getting enumerations from api: \n%v", err)
 	}
 
 	return nodeTypes.Data
