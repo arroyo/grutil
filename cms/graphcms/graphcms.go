@@ -68,27 +68,44 @@ func (g *GraphCMS) GetNodes() []interface{} {
 	return allNodes
 }
 
-// subfieldFormat will apply special rules to handle fields that both 
-// can and cannot be accounted for based on introspection.
-func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
+// subfieldException check for fields that cannot be accounted for by introspection
+func (g *GraphCMS) subfieldException(name string) string {
 	format := ""
-
-	if len(field.Args) > 1 {
-		return field.Name + " { id }\n"
-	}
 
 	// rgba is a normalized field with no distinguisging introspection data
 	// distance is based on a map input field that is irrelavant for a backup
-	switch field.Name {
+	switch name {
 	case "rgba":
 		format = "rgba { r g b a }\n"
 	case "distance":
 		format = ""
 	default:
-		format = field.Name + "\n"
+		format = name + "\n"
 	}
 
 	return format
+}
+
+// subfieldFormat will apply special rules to handle fields that both 
+// can and cannot be accounted for based on introspection.
+func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
+	if len(field.Type.Fields) > 0 {
+		subfields := ""
+		for _, f := range field.Type.Fields {
+			if len(f.Args) > 1 {
+				subfields += f.Name + " { id } \n"
+			} else {
+				subfields += g.subfieldException(f.Name)
+			}
+		}
+		return fmt.Sprintf("%v { %v }\n", field.Name, subfields)
+	}
+
+	if len(field.Args) > 1 {
+		return field.Name + " { id }\n"
+	}
+
+	return g.subfieldException(field.Name)
 }
 
 // GetAllNodesByType will give you all nodes for a given node type.
@@ -204,6 +221,16 @@ type NodeSubfield struct {
 		Description string `json:"description"`
 		DefaultValue string `json:"defaultValue"`
 	} `json:"args"`
+	Type struct {
+		Fields []struct {
+			Name string `json:"name"`
+			Description string `json:"description"`
+			Args []struct {
+				Name string `json:"name"`
+				Description string `json:"description"`
+			} `json:"args"`
+		} `json:"fields"`
+	} `json:"type"`
 }
 
 // NodeFields structure
@@ -263,6 +290,16 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 					name
 					description
 					defaultValue
+				}
+				type {
+					fields {
+						name
+						description
+						args {
+							name
+							description
+					  	}
+					}
 				}
 			  }
 			  possibleTypes {
