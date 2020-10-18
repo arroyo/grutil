@@ -11,8 +11,8 @@ package graphcms
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"reflect"
+	"strings"
 )
 
 // Pluralize will transform the schema model (node type) name to plural

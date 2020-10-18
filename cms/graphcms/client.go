@@ -17,6 +17,15 @@ import (
 	"strings"
 )
 
+// GraphResponse GraphCMS API response
+type GraphResponse struct {
+	Data   map[string]interface{} `json:"data"`
+	Errors []struct {
+		Message   string        `json:message`
+		Locations []interface{} `json:"locations"`
+	} `json:"errors"`
+}
+
 // CallGraphAPI to make a GraphQL API call with requestQuery & requestVars
 func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphResponse, error) {
 	var url string = fmt.Sprintf("%v", g.url)
@@ -51,13 +60,6 @@ func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphR
 	// Process the response
 	var apiResp GraphResponse
 	err = json.Unmarshal([]byte(body), &apiResp)
-
-	// Debug
-	// mapBody(body)
-	// fmt.Println(apiResp)
-	//fmt.Println(apiResp.Errors)
-	//fmt.Println(len(apiResp.Errors))
-
 	if len(apiResp.Errors) > 0 {
 		log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0].Message)
 	}

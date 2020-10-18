@@ -16,7 +16,7 @@ import (
 var schemasCmd = &cobra.Command{
 	Use:   "schemas",
 	Short: "Download content schemas to a json file.",
-	Long: `Download model and enumeration content schemas as json files`,
+	Long:  `Download model and enumeration content schemas as json files`,
 	Run: func(cmd *cobra.Command, args []string) {
 		schemas(args)
 	},

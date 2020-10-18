@@ -34,15 +34,6 @@ type Node struct {
 	Handle   string `json:"handle"`
 }
 
-// GraphResponse GraphCMS API response
-type GraphResponse struct {
-	Data   map[string]interface{} `json:"data"`
-	Errors []struct {
-		Message  string        `json:message`
-		Location []interface{} `json:"locations"`
-	} `json:"errors"`
-}
-
 // Init initialize config
 func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, path interface{}) {
 	g.url = url
@@ -56,7 +47,7 @@ func (g *GraphCMS) GetNodes() []interface{} {
 	// Get Node Types, loop through each type and then pull all content
 	g.NodeTypes = g.GetNodeTypes()
 	var allNodes []interface{}
-	
+
 	log.Println("NodeTypes:")
 	log.Println(g.NodeTypes)
 
@@ -97,7 +88,7 @@ func (g *GraphCMS) IsNodeType(name string) bool {
 	return false
 }
 
-// subfieldFormat will apply special rules to handle fields that both 
+// subfieldFormat will apply special rules to handle fields that both
 // can and cannot be accounted for based on introspection.
 func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
 	// To avoid recursive nesting, check for one of the known schema types and simply add an id if a match
@@ -156,7 +147,7 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	for index := range nodeFields.Type.Fields {
 		// Debug
 		log.Printf("name: %v, fields: %v, args: %v", nodeFields.Type.Fields[index].Name, len(nodeFields.Type.Fields[index].Type.Fields), len(nodeFields.Type.Fields[index].Args))
-		
+
 		// If an object, get id of that object, otherwise just grab the field name
 		if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
 			fields := ""
@@ -172,16 +163,16 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	}
 
 	query = fmt.Sprintf(query, g.Pluralize(name), fieldsQuery)
-
-	// Query all content for each node type
-	log.Println("query: ")
-	log.Println(query)
-
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
 		log.Fatalf("Error pulling all %s nodes from API: %v", name, err)
 	}
+
+	// Query all content for each node type
+	log.Println("query: ")
+	log.Println(query)
+	log.Println(allNodes.Data)
 
 	return allNodes.Data
 }
@@ -230,19 +221,19 @@ func (g *GraphCMS) GetNodeTypes() []string {
 
 // NodeSubfield structure
 type NodeSubfield struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
-	Args []struct {
-		Name string `json:"name"`
-		Description string `json:"description"`
+	Args        []struct {
+		Name         string `json:"name"`
+		Description  string `json:"description"`
 		DefaultValue string `json:"defaultValue"`
 	} `json:"args"`
 	Type struct {
 		Fields []struct {
-			Name string `json:"name"`
+			Name        string `json:"name"`
 			Description string `json:"description"`
-			Args []struct {
-				Name string `json:"name"`
+			Args        []struct {
+				Name        string `json:"name"`
 				Description string `json:"description"`
 			} `json:"args"`
 		} `json:"fields"`
@@ -257,25 +248,25 @@ type NodeFields struct {
 		Fields []struct {
 			Name        string `json:"name"`
 			Description string `json:"description"`
-			Args []struct {
-				Name string `json:"name"`
-				Description string `json:"description"`
-			  	DefaultValue string `json:"defaultValue"`
+			Args        []struct {
+				Name         string `json:"name"`
+				Description  string `json:"description"`
+				DefaultValue string `json:"defaultValue"`
 			} `json:"args"`
 			Type struct {
-				Name string `json:"name"`
-				Kind string `json:"kind"`
-				Description string `json:"description"`
-				Fields []NodeSubfield `json:"fields"`
-			  	OfType struct {
-					Name string `json:"name"`
+				Name        string         `json:"name"`
+				Kind        string         `json:"kind"`
+				Description string         `json:"description"`
+				Fields      []NodeSubfield `json:"fields"`
+				OfType      struct {
+					Name        string `json:"name"`
 					Description string `json:"description"`
-			  	}`json:"ofType"`
-			  	Interfaces []struct {
-					Name string `json:"name"`
+				} `json:"ofType"`
+				Interfaces []struct {
+					Name        string `json:"name"`
 					Description string `json:"description"`
-					Typename string `json:"__typename"`
-			  	} `json:"interfaces"`
+					Typename    string `json:"__typename"`
+				} `json:"interfaces"`
 			} `json:"type"`
 		} `json:"fields"`
 	} `json:"__type"`
@@ -441,11 +432,11 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 	type SchemaTypes struct {
 		Schema struct {
 			Types []struct {
-				Name string `json:"name"`
-				Kind string `json:"kind"`
+				Name        string `json:"name"`
+				Kind        string `json:"kind"`
 				Description string `json:"description"`
-				EnumValues []struct {
-					Name string `json:"name"`
+				EnumValues  []struct {
+					Name        string `json:"name"`
 					Description string `json:"description"`
 				} `json:"enumValues"`
 			} `json:"types"`
@@ -471,10 +462,9 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 	return allTypes
 }
 
-
 // GetAllEnumerations from the CMS, including system ENUMS
 /*
-func (g *GraphCMS) GetAllEnumerations() []interface{} {	
+func (g *GraphCMS) GetAllEnumerations() []interface{} {
 	names := g.GetEnumerationNames()
 	var enums []interface{}
 
@@ -493,7 +483,7 @@ func (g *GraphCMS) GetEnumerations() []interface{} {
 	enumConfig := viper.GetStringSlice("backups.enumerations")
 
 	fmt.Println(enumConfig)
-	
+
 	for _, name := range enumConfig {
 		enum := g.GetEnumeration(name)
 		enums = append(enums, enum)
