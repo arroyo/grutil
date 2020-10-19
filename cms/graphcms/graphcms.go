@@ -3,7 +3,7 @@ Copyright © 2020 John Arroyo
 
 cms graphcms package
 
-Get and download schemas and content from GraphCMS
+Get and persist both schemas and content from GraphCMS
 */
 
 package graphcms
@@ -22,13 +22,14 @@ type GraphCMS struct {
 	url       interface{}
 	key       interface{}
 	path      string
+	folder    string
 	structure map[string]string
 	stage     string
 	NodeTypes []string
 }
 
-// Node content struct
-type Node struct {
+// AssetNode simple content struct
+type AssetNode struct {
 	TypeName string `json:"__typename"`
 	ID       string `json:"id"`
 	Handle   string `json:"handle"`
@@ -44,17 +45,19 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 }
 
 // GetNodes from the cms
-func (g *GraphCMS) GetNodes() []interface{} {
+func (g *GraphCMS) GetNodes() map[string]interface{} {
 	// Get Node Types, loop through each type and then pull all content
 	g.NodeTypes = g.GetNodeTypes()
-	var allNodes []interface{}
+	allNodes := make( map[string]interface{} )
 
 	log.Println("NodeTypes:")
 	log.Println(g.NodeTypes)
 
 	for index := range g.NodeTypes {
-		nodes := g.GetAllNodesByType(g.NodeTypes[index])
-		allNodes = append(allNodes, nodes)
+		log.Println(g.NodeTypes[index])
+		allNodes[g.NodeTypes[index]] = g.GetAllNodesByType(g.NodeTypes[index])
+		// nodes := g.GetAllNodesByType(g.NodeTypes[index])
+		// allNodes = append(allNodes, nodes)
 	}
 
 	return allNodes
@@ -161,12 +164,17 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 		}
 	}
 
-	query = fmt.Sprintf(query, g.Pluralize(name), fieldsQuery)
+	nodes := g.Pluralize(name)
+	query = fmt.Sprintf(query, nodes, fieldsQuery)
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
 		log.Fatalf("error pulling all %s nodes from API: %v", name, err)
 	}
+
+	// Normalize name structure
+	allNodes.Data["nodes"] = allNodes.Data[nodes]
+	delete(allNodes.Data, nodes)
 
 	return allNodes.Data
 }
@@ -378,22 +386,22 @@ func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 }
 
 // GetSchemas retrives the schema and returns json
-func (g *GraphCMS) GetSchemas() []interface{} {
+func (g *GraphCMS) GetSchemas() map[string]interface{} {
 	g.NodeTypes = g.GetNodeTypes()
+	var schemas map[string]interface{}
+	var nodeType string
+	var err error
 
 	log.Println("NodeTypes: ")
 	log.Println(g.NodeTypes)
 
-	var schemas []interface{}
-
 	for index := range g.NodeTypes {
-		fmt.Println(index)
-		fmt.Println(g.NodeTypes[index])
-		schema, err := g.GetSchema(g.NodeTypes[index])
+		nodeType = g.NodeTypes[index]
+		log.Println(index)
+		log.Println(nodeType)
+		schemas[nodeType], err = g.GetSchema(nodeType)
 		if err != nil {
-			fmt.Printf("error getting %v schema", g.NodeTypes[index])
-		} else {
-			schemas = append(schemas, schema)
+			log.Printf("error getting %v schema", nodeType)
 		}
 	}
 
@@ -472,15 +480,14 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 */
 
 // GetEnumerations from the CMS based on enumerations defined in your config
-func (g *GraphCMS) GetEnumerations() []interface{} {
-	var enums []interface{}
+func (g *GraphCMS) GetEnumerations() map[string]interface{} {
+	var enums map[string]interface{}
 	enumConfig := viper.GetStringSlice("backups.enumerations")
 
 	fmt.Println(enumConfig)
 
 	for _, name := range enumConfig {
-		enum := g.GetEnumeration(name)
-		enums = append(enums, enum)
+		enums[name] = g.GetEnumeration(name)
 	}
 
 	return enums

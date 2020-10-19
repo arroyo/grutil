@@ -48,7 +48,7 @@ func prepFolder(folder string) {
 // Full filepath comes from the vars in the struct
 // Path + Folder + Filename
 // Path & Folder can be empty, but filename cannot be
-func (f *File) WriteFileJSON(data []interface{}) {
+func (f *File) WriteFileJSON(data map[string]interface{}) {
 	// @todo check if folder empty?
 	// @todo make sure filepath is not empty
 	var fullpath = fmt.Sprintf("%v%v", f.Path, f.Folder)

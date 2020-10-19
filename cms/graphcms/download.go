@@ -1,9 +1,9 @@
 /*
 Copyright © 2020 John Arroyo
 
-cms graphcms package
+cms graphcms package: download
 
-Get and download schemas and content from GraphCMS
+Retrieve and persist schemas, content & assets from GraphCMS
 */
 
 package graphcms
@@ -17,7 +17,7 @@ import (
 )
 
 // WriteFileJSON write json struct to a file
-func (g *GraphCMS) WriteFileJSON(data []interface{}, folder string, filename string) {
+func (g *GraphCMS) WriteFileJSON(data map[string]interface{}, folder string, filename string) {
 	var file storage.File
 	file.Init(g.path, folder, filename)
 	file.WriteFileJSON(data)
@@ -62,33 +62,21 @@ func (g *GraphCMS) DownloadEnumerations() error {
 	return err
 }
 
-// DownloadAllEnumerations to a file
-func (g *GraphCMS) DownloadAllEnumerations() error {
-	var err error
-	enums := g.GetAllEnumerations()
-
-	// Write nodes to file
-	g.WriteFileJSON(enums, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "all.json")
-
-	return err
-}
-
 // DownloadAssets loop through nodes, look for assets and download
-func (g *GraphCMS) DownloadAssets(data []interface{}) {
-	var node Node
-	var f storage.File
+func (g *GraphCMS) DownloadAssets(data map[string]interface{}) {
+	var node AssetNode
+	var file storage.File
+	file.Init(g.path, g.folder, "")
 
 	// Loop through nodes, find assets and download them
-	for index := range data {
-		byteData, _ := json.Marshal(data[index])
+	for index := range data["nodes"].( []interface{} ) {
+		byteData, _ := json.Marshal(data["nodes"].( []interface{} )[index])
 		err := json.Unmarshal(byteData, &node)
 		if err != nil {
 			panic(err)
 		}
-
 		if node.TypeName == "Asset" {
-			url := fmt.Sprintf("https://media.graphcms.com/%v", node.Handle)
-			err = f.DownloadFile(url, node.Handle)
+			err = file.DownloadFile(node.URL, node.Handle)
 			if err != nil {
 				panic(err)
 			}
@@ -105,8 +93,8 @@ func (g *GraphCMS) DownloadContent() {
 	g.WriteFileJSON(data, fmt.Sprintf("/%v/content/nodes", g.stage), "0001.json")
 
 	// Download all assets into the assets folder
-	// g.Folder = "/assets"
-	g.DownloadAssets(data)
+	g.folder = fmt.Sprintf("/%v/content/assets", g.stage)
+	g.DownloadAssets( data["Asset"].(map[string]interface{}) )
 
 	/* Get lists from GraphCMS and write to file */
 	// data = g.GetListsV1()

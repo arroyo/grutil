@@ -1,7 +1,7 @@
 /*
 Copyright © 2020 John Arroyo
 
-cms graphcms package
+cms graphcms package: API client
 
 Connect to the GraphCMS API, graphcms.com
 */

@@ -1,7 +1,7 @@
 /*
 Copyright © 2020 John Arroyo
 
-cms graphcms package
+cms graphcms package: utilities
 
 Get and download schemas and content from GraphCMS
 */
@@ -27,11 +27,11 @@ func mapBody(body []uint8) error {
 	fmt.Println(reflect.TypeOf(body).String())
 
 	// Unserialize
-	var bodyJson interface{}
-	err := json.Unmarshal([]byte(body), &bodyJson)
+	var bodyJSON interface{}
+	err := json.Unmarshal([]byte(body), &bodyJSON)
 
-	fmt.Println(bodyJson)
-	fmt.Println(reflect.TypeOf(bodyJson).String())
+	fmt.Println(bodyJSON)
+	fmt.Println(reflect.TypeOf(bodyJSON).String())
 
 	return err
 }
