@@ -27,11 +27,12 @@ type GraphCMS struct {
 	NodeTypes []string
 }
 
-// Node content node
+// Node content struct
 type Node struct {
-	TypeName string `json:"_typeName"`
+	TypeName string `json:"__typename"`
 	ID       string `json:"id"`
 	Handle   string `json:"handle"`
+	URL 	 string `json:"url"`
 }
 
 // Init initialize config
@@ -96,6 +97,7 @@ func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
 		return field.Name + " { id }\n"
 	}
 
+	// If fields are present pull them and return subquery
 	if len(field.Type.Fields) > 0 {
 		subfields := ""
 		for _, f := range field.Type.Fields {
@@ -108,10 +110,12 @@ func (g *GraphCMS) subfieldFormat(field NodeSubfield) string {
 		return fmt.Sprintf("%v { %v }\n", field.Name, subfields)
 	}
 
+	// If there are multiple args it indicates we need a refrence id
 	if len(field.Args) > 1 {
 		return field.Name + " { id }\n"
 	}
 
+	//  Else apply subfield exceptions and return
 	return g.subfieldException(field.Name)
 }
 
@@ -138,13 +142,11 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 	// Query builder, create GraphQL query to pull all nodes and content fields
 	query = `query {
 		%v {
+			__typename
 			%v
 		}
 	}`
-	for index := range nodeFields.Type.Fields {
-		// Debug
-		log.Printf("name: %v, fields: %v, args: %v", nodeFields.Type.Fields[index].Name, len(nodeFields.Type.Fields[index].Type.Fields), len(nodeFields.Type.Fields[index].Args))
-
+	for index := range nodeFields.Type.Fields {		
 		// If an object, get id of that object, otherwise just grab the field name
 		if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
 			fields := ""

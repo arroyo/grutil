@@ -79,7 +79,7 @@ func (g *GraphCMS) DownloadAssets(data []interface{}) {
 	var f storage.File
 
 	// Loop through nodes, find assets and download them
-	for index, _ := range data {
+	for index := range data {
 		byteData, _ := json.Marshal(data[index])
 		err := json.Unmarshal(byteData, &node)
 		if err != nil {
