@@ -57,7 +57,7 @@ func (g *GraphCMS) DownloadEnumerations() error {
 	enums := g.GetEnumerations()
 
 	// Write nodes to file
-	g.WriteFileJSON(enums, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "select.json")
+	g.WriteFileJSON(enums, fmt.Sprintf("/%v/schemas/enumerations", g.stage), "selection.json")
 
 	return err
 }

@@ -388,7 +388,7 @@ func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 // GetSchemas retrives the schema and returns json
 func (g *GraphCMS) GetSchemas() map[string]interface{} {
 	g.NodeTypes = g.GetNodeTypes()
-	var schemas map[string]interface{}
+	schemas := make( map[string]interface{} )
 	var nodeType string
 	var err error
 
@@ -481,10 +481,8 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 
 // GetEnumerations from the CMS based on enumerations defined in your config
 func (g *GraphCMS) GetEnumerations() map[string]interface{} {
-	var enums map[string]interface{}
+	enums := make( map[string]interface{} )
 	enumConfig := viper.GetStringSlice("backups.enumerations")
-
-	fmt.Println(enumConfig)
 
 	for _, name := range enumConfig {
 		enums[name] = g.GetEnumeration(name)
@@ -494,7 +492,7 @@ func (g *GraphCMS) GetEnumerations() map[string]interface{} {
 }
 
 // GetEnumeration get a single enumeration by name from the API using introspection
-func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
+func (g *GraphCMS) GetEnumeration(name string) interface{} {
 	var query string = `query EnumerationValues {
 		__type(name: "%v") {
 		  kind
@@ -512,6 +510,6 @@ func (g *GraphCMS) GetEnumeration(name string) map[string]interface{} {
 	if err != nil {
 		log.Printf("error getting enumerations from api: \n%v", err)
 	}
-
-	return nodeTypes.Data
+	
+	return nodeTypes.Data["__type"]
 }
