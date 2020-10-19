@@ -15,14 +15,9 @@ import (
 
 // backupCmd represents the backup command
 var contentCmd = &cobra.Command{
-	Use:   "enumerations",
-	Short: "Backup enumerations to a json file.",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "content",
+	Short: "Download all content, including assets",
+	Long: `Download all content and assets, grouped by schema type.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Download content")
 

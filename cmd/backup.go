@@ -6,7 +6,6 @@ Copyright © 2020 John Arroyo
 package cmd
 
 import (
-	"fmt"
 	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,18 +14,13 @@ import (
 // backupCmd represents the backup command
 var backupCmd = &cobra.Command{
 	Use:   "backup",
-	Short: "Backup your project's node schemas & enumerations",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Download project schemas and content archived by date",
+	Long: `Download all node, list, and relation metadata as well as download all assets.  
+	Everything will be saved in the path set in your config file organized by date.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Back up schemas and content ")
-
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+		gcms.Backup()
 	},
 }
 

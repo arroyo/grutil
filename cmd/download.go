@@ -8,38 +8,22 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download all content and assets",
-	Long: `Download all node, list, and relation metadata as well as download all assets.  
-	Everything will be saved in the folder set in your config file.
-	An optional subfolder name can be added, e.g. cmsutil download myfolder
+	Short: "Download schemas or content and assets",
+	Long: `There are two download options.
+	cmsutil download content
+	cmsutil download schemas
+
+	for additional help run: cmsutil download -h
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		download(args)
+		fmt.Println("Missing download option, for more help type, cmsutil download -h")
 	},
-}
-
-func download(args []string) {
-	// Determine base file path
-	if len(args) > 0 {
-		path = fmt.Sprintf("%v/%v", viper.Get("backups.path"), args[0])
-	} else {
-		path = fmt.Sprintf("%v", viper.Get("backups.path"))
-	}
-
-	fmt.Printf("Your downloads will be stored at %v\n", path)
-	fmt.Println("Begin download of CMS content...")
-
-	var gcms graphcms.GraphCMS
-	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-	gcms.DownloadContent()
 }
 
 func init() {

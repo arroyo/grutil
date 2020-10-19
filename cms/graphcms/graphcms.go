@@ -50,14 +50,9 @@ func (g *GraphCMS) GetNodes() map[string]interface{} {
 	g.NodeTypes = g.GetNodeTypes()
 	allNodes := make( map[string]interface{} )
 
-	log.Println("NodeTypes:")
-	log.Println(g.NodeTypes)
-
 	for index := range g.NodeTypes {
-		log.Println(g.NodeTypes[index])
+		log.Printf("Get %v nodes", g.NodeTypes[index])
 		allNodes[g.NodeTypes[index]] = g.GetAllNodesByType(g.NodeTypes[index])
-		// nodes := g.GetAllNodesByType(g.NodeTypes[index])
-		// allNodes = append(allNodes, nodes)
 	}
 
 	return allNodes
@@ -339,48 +334,49 @@ func (g *GraphCMS) GetNodeFields(name string) map[string]interface{} {
 }
 
 // GetSchema returns a single schema as json
-func (g *GraphCMS) GetSchema(name string) (map[string]interface{}, error) {
-	var schema string
-	var err error
+func (g *GraphCMS) GetSchema(name string) (interface{}, error) {
 	query, queryVars := g.GetSchemaQuery(name)
-
 	response, err := g.CallGraphAPI(query, queryVars)
 	if err != nil {
 		fmt.Printf("API Failre: %v", err)
 	}
 
-	// Pretty print to screen (debug)
-	buff, err := json.MarshalIndent(response.Data, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	schema = fmt.Sprintf("%s", buff)
-	fmt.Printf("Schema: %v", schema)
-
-	return response.Data, err
+	return response.Data["__type"], err
 }
 
 // GetSchemaQuery returns a GraphQL query
 func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 	var query = `query ($nodetype: String!) {
 		__type(name: $nodetype) {
-		  name
-		  kind
-		  fields {
 			name
-			description
-			type {
-			  name
-			  kind
-			  description
+			kind
+			fields {
+				name
+				description
+				args {
+					name
+					description
+					defaultValue
+				}
+				type {
+					name
+					kind
+					description
+					fields {
+						name
+						description
+						type {
+							fields {
+								name
+								description
+							}
+						}
+					}
+				}
 			}
-		  }
 		}
-	  }`
+	}`
 	var queryVars = fmt.Sprintf(`{"nodetype":"%s"}`, name)
-
-	fmt.Println(query)
-	fmt.Println(queryVars)
 
 	return query, queryVars
 }
@@ -392,13 +388,11 @@ func (g *GraphCMS) GetSchemas() map[string]interface{} {
 	var nodeType string
 	var err error
 
-	log.Println("NodeTypes: ")
-	log.Println(g.NodeTypes)
+	fmt.Printf("NodeTypes: %v\n", g.NodeTypes)
 
 	for index := range g.NodeTypes {
 		nodeType = g.NodeTypes[index]
-		log.Println(index)
-		log.Println(nodeType)
+		log.Printf("Get %v schema json", nodeType)
 		schemas[nodeType], err = g.GetSchema(nodeType)
 		if err != nil {
 			log.Printf("error getting %v schema", nodeType)
@@ -510,6 +504,6 @@ func (g *GraphCMS) GetEnumeration(name string) interface{} {
 	if err != nil {
 		log.Printf("error getting enumerations from api: \n%v", err)
 	}
-	
+
 	return nodeTypes.Data["__type"]
 }

@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/arroyo/cmsutil/storage"
 )
@@ -84,7 +85,7 @@ func (g *GraphCMS) DownloadAssets(data map[string]interface{}) {
 	}
 }
 
-// DownloadContent from the GraphCMS
+// DownloadContent from GraphCMS
 func (g *GraphCMS) DownloadContent() {
 	/* Get nodes from GraphCMS and write to file */
 	data := g.GetNodes()
@@ -103,4 +104,19 @@ func (g *GraphCMS) DownloadContent() {
 	/* Get relations from GraphCMS and write to file */
 	// data = g.GetRelationsV1()
 	// g.WriteFileJSON(data, fmt.Sprintf("/%v/content/relations", g.stage), "0001.json")
+}
+
+// Backup content and schemas from GraphCMS
+func (g *GraphCMS) Backup() {
+	// Update the path based on the current time
+	now := time.Now()
+	timestamp := now.Unix()
+	g.path += fmt.Sprintf("/%v", timestamp)
+	fmt.Printf("Backing up to %v\n", g.path)
+
+	// Download schemas
+	g.DownloadSchemas()
+
+	// Download content
+	g.DownloadContent()
 }
