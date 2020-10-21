@@ -19,13 +19,14 @@ import (
 
 // GraphCMS struct
 type GraphCMS struct {
-	url       interface{}
-	key       interface{}
-	path      string
-	folder    string
-	structure map[string]string
-	stage     string
-	NodeTypes []string
+	url       		interface{}
+	key       		interface{}
+	path      		string
+	folder    		string
+	structure 		map[string]string
+	stage     		string
+	NodeTypes 		[]string
+	SpecialCases 	map[string]string
 }
 
 // AssetNode simple content struct
@@ -42,6 +43,10 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 	g.key = key
 	g.path = fmt.Sprintf("%v", path)
 	g.stage = fmt.Sprintf("%v", stage)
+	g.SpecialCases = map[string]string {
+		"RichText": "%v { raw html markdown text }\n",
+		"Asset": "%v { id }\n",
+	}
 }
 
 // GetNodes from the cms
@@ -84,6 +89,16 @@ func (g *GraphCMS) IsNodeType(name string) bool {
 		}
 	}
 
+	return false
+}
+
+// IsSpecialCase field type
+func (g *GraphCMS) IsSpecialCase(name string) bool {
+	for key := range g.SpecialCases {
+        if key == name {
+            return true
+        }
+    }
 	return false
 }
 
@@ -144,9 +159,13 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 			%v
 		}
 	}`
-	for index := range nodeFields.Type.Fields {		
-		// If an object, get id of that object, otherwise just grab the field name
-		if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
+	for index := range nodeFields.Type.Fields {
+		// Check field typeOf; Loop fields; If an object, get id of that object, otherwise just grab the field name
+		if g.IsNodeType(nodeFields.Type.Fields[index].Type.Name) {
+			fieldsQuery += nodeFields.Type.Fields[index].Name + " { id }\n"
+		} else if g.IsSpecialCase(nodeFields.Type.Fields[index].Type.OfType.Name) {
+			fieldsQuery += fmt.Sprintf(g.SpecialCases[nodeFields.Type.Fields[index].Type.OfType.Name], nodeFields.Type.Fields[index].Name)
+		} else if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
 			fields := ""
 			for _, field := range nodeFields.Type.Fields[index].Type.Fields {
 				fields += g.subfieldFormat(field)
@@ -161,6 +180,9 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 
 	nodes := g.Pluralize(name)
 	query = fmt.Sprintf(query, nodes, fieldsQuery)
+
+	fmt.Printf("node query: %v \n", query)
+
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
