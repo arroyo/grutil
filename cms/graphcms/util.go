@@ -16,9 +16,30 @@ import (
 )
 
 // Pluralize will transform the schema model (node type) name to plural
-// @note this is a dumb implementation and will need to be augmented later
+// Took the 80/20 rule here and tried to capture the bulk of the cases with minimal logic
+// English can be an ugly language, see rules at https://www.grammarly.com/blog/plural-nouns/
 func (g *GraphCMS) Pluralize(name string) string {
-	return fmt.Sprintf("%ss", g.lcFirst(name))
+	var plural string
+	lastChar := name[len(name)-1:]
+	nameTransform := g.lcFirst(name)
+
+	// If word end in 'y' and convert to 'ies'
+	if lastChar == "y" {
+		plural = fmt.Sprintf("%sies", nameTransform[0:len(nameTransform)-1])
+
+	// If a word ends in ‑s, ‑x, -z or ‑o add 'es'
+	} else if lastChar == "s" || lastChar == "x" || lastChar == "z" || lastChar == "o" {
+		plural = fmt.Sprintf("%ses", nameTransform)
+	
+	// For almost all other nouns, simply add 's' to pluralize
+	} else {
+		plural = fmt.Sprintf("%ss", g.lcFirst(name))
+	}
+	
+	// @todo If a word ends in ‑sh or ‑ch you add 'es'
+	// @todo add a manual override in the config for difficult plurals like wife, wolf, & gas
+	
+	return plural
 }
 
 // lcFirst make the first character lowercase
