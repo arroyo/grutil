@@ -2,9 +2,7 @@
 
 Headless CMS CLI Utility
 
-**Pre-Alpha** latest implementation not ready for use just yet.
-
-Log any issues to Github issues.
+Please log any issues to Github issues.
 
 The current version works with [GraphCMS](https://graphcms.com/) and backs up your project to disk, including asset files.
 
@@ -16,7 +14,7 @@ There is an example config file in the repo.
 
 It has been tested with YAML, but it is possible to use JSON or TOML (use the extensions .json and .toml respectively).
 
-CMS_API_URL must start with http:// or https://
+CMS_API_URL must start with https:// or http://
 
 ### Envars
 
@@ -30,23 +28,27 @@ CMS_API_KEY
 
 Get a copy of your schema or content with the download command. Backup your entire project with the backup command.
 
-Download schema models and enumerations
+### Download schema models and enumerations
 
 ```shell-script
 cmsutil download schemas
 ```
 
-Download node content and assets
+### Download node content and assets
 
 ```shell-script
 cmsutil download content
 ```
 
-Backup your site
+### Backup your site
+
+download both schemas and content into a timestamped folder
 
 ```shell-script
 cmsutil backup
 ```
+
+### Help
 
 Get general help or help with a specific command using.
 
