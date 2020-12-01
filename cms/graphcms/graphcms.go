@@ -28,6 +28,7 @@ type GraphCMS struct {
 	NodeTypes 		[]string
 	SpecialCases 	map[string]string
 	Debug			bool
+	Exceptions		map[string]string
 }
 
 // AssetNode simple content struct
@@ -49,6 +50,10 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 		"Asset": "%v { id }\n",
 	}
 	g.Debug = false
+	g.Exceptions = viper.GetStringMapString("exceptions.plurals")
+	if g.Debug {
+		log.Println(g.Exceptions)
+	}
 }
 
 // GetNodes from the cms

@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"unicode"
 )
 
@@ -20,6 +21,18 @@ import (
 // English can be an ugly language, see rules at https://www.grammarly.com/blog/plural-nouns/
 func (g *GraphCMS) Pluralize(name string) string {
 	var plural string
+
+	// Manual override in the config for difficult plurals like wife, wolf, & gas
+	if v, found := g.Exceptions[strings.ToLower(name)]; found {
+		plural = g.lcFirst(v)
+
+		if g.Debug {
+			fmt.Printf("manual override for %s: %s", name, plural)
+		}
+
+		return plural
+	}
+
 	lastChar := name[len(name)-1:]
 	nameTransform := g.lcFirst(name)
 
@@ -37,7 +50,6 @@ func (g *GraphCMS) Pluralize(name string) string {
 	}
 	
 	// @todo If a word ends in ‑sh or ‑ch you add 'es'
-	// @todo add a manual override in the config for difficult plurals like wife, wolf, & gas
 	
 	return plural
 }
