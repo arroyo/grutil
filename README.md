@@ -6,6 +6,14 @@ Please log any issues to Github issues.
 
 The current version works with [GraphCMS](https://graphcms.com/) and backs up your project to disk, including asset files.
 
+## Install
+
+Once you have [Go installed](https://golang.org/doc/install) on your target environment, to install cmsutil run
+
+```
+go get github.com/arroyo/cmsutil
+```
+
 ## Config
 
 In your home directory create a folder called ".cmsutil" and put a text file called "config.yaml" in it.
