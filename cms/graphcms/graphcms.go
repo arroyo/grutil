@@ -27,6 +27,7 @@ type GraphCMS struct {
 	stage     		string
 	NodeTypes 		[]string
 	SpecialCases 	map[string]string
+	Debug			bool
 }
 
 // AssetNode simple content struct
@@ -47,6 +48,7 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 		"RichText": "%v { raw html markdown text }\n",
 		"Asset": "%v { id }\n",
 	}
+	g.Debug = false
 }
 
 // GetNodes from the cms
@@ -98,7 +100,8 @@ func (g *GraphCMS) IsSpecialCase(name string) bool {
         if key == name {
             return true
         }
-    }
+	}
+	
 	return false
 }
 
@@ -160,19 +163,35 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 		}
 	}`
 	for index := range nodeFields.Type.Fields {
-		// Check field typeOf; Loop fields; If an object, get id of that object, otherwise just grab the field name
+		// Is it one of our custom node types
 		if g.IsNodeType(nodeFields.Type.Fields[index].Type.Name) {
 			fieldsQuery += nodeFields.Type.Fields[index].Name + " { id }\n"
-		} else if g.IsSpecialCase(nodeFields.Type.Fields[index].Type.OfType.Name) {
-			fieldsQuery += fmt.Sprintf(g.SpecialCases[nodeFields.Type.Fields[index].Type.OfType.Name], nodeFields.Type.Fields[index].Name)
+		
+		// Is it a union field?
+		} else if nodeFields.Type.Fields[index].Type.Kind == "UNION" {
+			fields := ""
+			for i := range nodeFields.Type.Fields[index].Type.PossibleTypes {
+				fields += fmt.Sprintf("... on %v { id }\n", nodeFields.Type.Fields[index].Type.PossibleTypes[i].Name)
+			}
+			fieldsQuery += fmt.Sprintf("%v { %v } \n", nodeFields.Type.Fields[index].Name, fields)
+		
+		// Do we have fields defined?
 		} else if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
 			fields := ""
 			for _, field := range nodeFields.Type.Fields[index].Type.Fields {
 				fields += g.subfieldFormat(field)
 			}
 			fieldsQuery += fmt.Sprintf("%v { %v } \n", nodeFields.Type.Fields[index].Name, fields)
+
+		// Is it in our special case map?
+		} else if g.IsSpecialCase(nodeFields.Type.Fields[index].Type.OfType.Name) {
+			fieldsQuery += fmt.Sprintf(g.SpecialCases[nodeFields.Type.Fields[index].Type.OfType.Name], nodeFields.Type.Fields[index].Name)
+		
+		// Do we still need this?
 		} else if len(nodeFields.Type.Fields[index].Args) > 1 {
 			fieldsQuery += fmt.Sprintf("%v { id } \n", nodeFields.Type.Fields[index].Name)
+		
+		// Default
 		} else {
 			fieldsQuery += nodeFields.Type.Fields[index].Name + "\n"
 		}
@@ -180,8 +199,9 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 
 	nodes := g.Pluralize(name)
 	query = fmt.Sprintf(query, nodes, fieldsQuery)
-
-	fmt.Printf("node query: %v \n", query)
+	if g.Debug {
+		log.Printf("node query: %v \n", query)
+	}
 
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
@@ -277,6 +297,10 @@ type NodeFields struct {
 				Kind        string         `json:"kind"`
 				Description string         `json:"description"`
 				Fields      []NodeSubfield `json:"fields"`
+				PossibleTypes []struct {
+					Name        string `json:"name"`
+					Description string `json:"description"`
+				} `json:"possibleTypes"`
 				OfType      struct {
 					Name        string `json:"name"`
 					Description string `json:"description"`

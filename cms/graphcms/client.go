@@ -61,7 +61,15 @@ func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphR
 	var apiResp GraphResponse
 	err = json.Unmarshal([]byte(body), &apiResp)
 	if len(apiResp.Errors) > 0 {
-		log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0].Message)
+		if len(apiResp.Data) > 0 {
+			// data is sometimes returned even if there is an error. GraphCMS edge case / quirk.
+			if g.Debug {
+				log.Printf("response: %v", requestQuery)
+				log.Printf("response: %v", apiResp)
+			}
+		} else {
+			log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0].Message)
+		}
 	}
 
 	return apiResp, err
