@@ -30,10 +30,6 @@ func init() {
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// backupCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// backupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// and all subcommands
+	backupCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Override the directory in the config file")
 }

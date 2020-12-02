@@ -14,13 +14,10 @@ import (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download schemas or content and assets",
+	Short: "Download schemas or content and assets. For additional help run: cmsutil download -h",
 	Long: `There are two download options.
 	cmsutil download content
-	cmsutil download schemas
-
-	for additional help run: cmsutil download -h
-	`,
+	cmsutil download schemas`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Missing download option, for more help type, cmsutil download -h")
 	},
@@ -32,10 +29,6 @@ func init() {
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// downloadCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// downloadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// and all subcommands
+	downloadCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Override the directory in the config file")
 }

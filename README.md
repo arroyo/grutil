@@ -63,4 +63,5 @@ Get general help or help with a specific command using.
 ```shell-script
 cmsutil help
 cmsutil download -h
+cmsutil backup -h
 ```

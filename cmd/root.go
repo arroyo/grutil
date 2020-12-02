@@ -20,10 +20,7 @@ var cfgFile, path, developer, directory string
 var rootCmd = &cobra.Command{
 	Use:   "cmsutil",
 	Short: "CMS Utility",
-	Long:  `A headless CMS utility for interacting with a headless CMS for simple tasks like backup`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Long:  `A headless CMS utility for interacting with a CMS API for simple tasks like download and backup`,
 }
 
 // Config structure
@@ -59,13 +56,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cmsutil/config.yaml)")
-	rootCmd.PersistentFlags().StringVar(&developer, "developer", "Unknown Developer!", "Developer name.")
-	rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Add sub directory in config path")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Change path pointing to where config file is stored. (default $HOME/.cmsutil/config.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
