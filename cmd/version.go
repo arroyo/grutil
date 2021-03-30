@@ -8,6 +8,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -17,12 +18,12 @@ import (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Display the current version of the cmsutil CLI",
-	Long: `Display the current version of the cmsutil CLI`,
+	Long:  `Display the current version of the cmsutil CLI`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(`
 {
-	"version": "v0.3.2"
-	"date": "2020-12-02 00:36:47 -0800"
+	"version": "v0.3.3"
+	"date": "2021-03-12 00:36:47 -0800"
 }
 		`)
 	},

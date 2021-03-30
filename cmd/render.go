@@ -13,19 +13,19 @@ import (
 )
 
 // downloadCmd represents the download command
-var downloadCmd = &cobra.Command{
-	Use:   "download",
-	Short: "Download schemas or content and assets. For additional help run: cmsutil download -h",
-	Long: `There are two download options.
-	cmsutil download content
-	cmsutil download schemas`,
+var renderCmd = &cobra.Command{
+	Use:   "render",
+	Short: "Render schema nodes against a template. For additional help run: cmsutil render -h",
+	Long: `There are two render types.
+	cmsutil render md
+	cmsutil render audio`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Missing download option, for more help type, cmsutil download -h")
+		fmt.Println("Missing render type, for more help type, cmsutil render -h")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(downloadCmd)
+	rootCmd.AddCommand(renderCmd)
 
 	// Here you will define your flags and configuration settings.
 
