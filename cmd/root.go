@@ -15,13 +15,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile, path, developer, directory, schema string
+var cfgFile, path, developer, directory, schema, query, template, filename string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "cmsutil",
 	Short: "CMS Utility",
-	Long:  `A headless CMS utility for interacting with a CMS API for simple tasks like download and backup`,
+	Long:  `A headless CMS utility for interacting with a CMS API for simple tasks like download, backup, & render`,
 }
 
 // Config structure

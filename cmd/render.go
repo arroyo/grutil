@@ -7,20 +7,20 @@ Copyright © 2020 John Arroyo
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // downloadCmd represents the download command
 var renderCmd = &cobra.Command{
 	Use:   "render",
-	Short: "Render schema nodes against a template. For additional help run: cmsutil render -h",
-	Long: `There are two render types.
-	cmsutil render md
-	cmsutil render audio`,
+	Short: "Render CMS content as file(s) using a template",
+	Long:  `Render the queried content nodes against a template`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Missing render type, for more help type, cmsutil render -h")
+		var gcms graphcms.GraphCMS
+		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+		gcms.RenderTemplate(query, template, filename)
 	},
 }
 
@@ -31,4 +31,11 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands
+	renderCmd.Flags().StringVarP(&query, "query", "q", "", "GraphQL query to pull data from CMS")
+	renderCmd.Flags().StringVarP(&template, "template", "t", "", "Template to render the content against")
+	renderCmd.Flags().StringVarP(&filename, "filename", "f", "", "Filename of the output")
+
+	renderCmd.MarkFlagRequired("query")
+	renderCmd.MarkFlagRequired("template")
+	renderCmd.MarkFlagRequired("filename")
 }

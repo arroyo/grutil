@@ -29,9 +29,14 @@ type GraphResponse struct {
 // CallGraphAPI to make a GraphQL API call with requestQuery & requestVars
 func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphResponse, error) {
 	var url string = fmt.Sprintf("%v", g.url)
+	// Safety check for GraphQL vars, API expects {}
+	if requestVars == "" {
+		requestVars = "{}"
+	}
 	requestBody := fmt.Sprintf(`{"query":"%v","variables":%v}`, g.formatQuery(requestQuery), requestVars)
 	authorization := fmt.Sprintf("Bearer %v", g.key)
 	bodyIoReader := strings.NewReader(requestBody)
+	// fmt.Println(requestBody)
 
 	req, err := http.NewRequest("POST", url, bodyIoReader)
 	if err != nil {
