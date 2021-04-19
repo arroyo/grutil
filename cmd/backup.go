@@ -31,5 +31,5 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands
-	backupCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Override the directory in the config file")
+	// backupCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Override the directory in the config file")
 }

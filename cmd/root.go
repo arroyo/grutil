@@ -15,7 +15,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile, path, developer, directory, schema, query, template, filename string
+var cfgFile, path, developer, directory, schema, query, template, outputFilename string
+var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -56,7 +57,8 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Specify directory to save file")
+	// rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Specify directory to save file")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Set to true to turn on extended output")
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Change path pointing to where config file is stored. (default $HOME/.cmsutil/config.yaml)")
 }
 
@@ -83,7 +85,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		if verbose {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}	
 	}
 
 	viper.SetDefault("backups.schemapath", home+"/.cmsutil/backups/schema")
