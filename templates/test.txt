@@ -1,6 +1,13 @@
 {
-    {{ . }}
     {{ .Data }}
 }
-{{ json .Data }}
-{{ title "test this title function" }}
+
+json data: {{ json .Data }}
+
+jsonPretty data: {{ jsonPretty .Data }}
+
+title: {{ title "test this title function" }}
+
+"faq": {{ index .Data.faq | jsonPretty }}
+
+publishedAt: {{ index .Data.faq.publishedAt }}
