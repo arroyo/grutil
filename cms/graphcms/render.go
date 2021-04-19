@@ -3,7 +3,7 @@ Copyright © 2021 John Arroyo
 
 graphcms package: render
 
-Render given nodes against a template
+Render nodes against a template
 */
 
 package graphcms
@@ -11,11 +11,12 @@ package graphcms
 import (
 	// ht "html/template"
 	// "fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"regexp"
 	"strings"
-	tt "text/template"	
+	tt "text/template"
 )
 
 // getTemplateFilename gets the filename from a template file path
@@ -38,22 +39,23 @@ func (g *GraphCMS) getTemplate(templateName string) string {
 // RenderTemplate with CMS data
 func (g *GraphCMS) RenderTemplate(query string, template string, outputFilename string) {
 	// Get the queried data from GraphCMS
-	response, err := g.CallGraphAPI(query, "{}")
+	var err error
+	g.RenderData, err = g.CallGraphAPI(query, "{}")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Get template file, read template and render
-	funcMap := tt.FuncMap {
-		"title": strings.Title,
-		"json": RenderJson,
-		"oddOrEven": OddOrEven,
-    }
+	funcMap := tt.FuncMap{
+		"title":      strings.Title,
+		"json":       g.RenderJson,
+		"jsonPretty": g.RenderJsonPretty,
+	}
 	t := tt.New(g.getTemplateFilename(template))
 	t.Funcs(funcMap)
 	t, err = t.ParseFiles(g.getTemplate(template))
-	
-	err = t.Execute(os.Stdout, response)
+
+	err = t.Execute(os.Stdout, g.RenderData)
 	if err != nil {
 		panic(err)
 	}
@@ -63,27 +65,16 @@ func (g *GraphCMS) RenderTemplate(query string, template string, outputFilename 
 	return
 }
 
-func RenderJson(s string) string {
-	if s == "" {
-		// @todo grab the full response data
-	} else {
-		// @todo parse the string to determine which json segment to render
-	}
+// RenderJson converts the incoming data to a formatted json string
+func (g *GraphCMS) RenderJson(data map[string]interface{}) string {
+	jsonStr, _ := json.Marshal(data)
 
-	if len(s)%2 == 0 {
-			return "even"
-	} else {
-			return "odd"
-	}
-
+	return string(jsonStr)
 }
 
-func OddOrEven(s string) string {
+// RenderJsonPretty converts the incoming data to an indented json string
+func (g *GraphCMS) RenderJsonPretty(data map[string]interface{}) string {
+	jsonStr, _ := json.MarshalIndent(data, "", "  ")
 
-	if len(s)%2 == 0 {
-			return "even"
-	} else {
-			return "odd"
-	}
-
+	return string(jsonStr)
 }

@@ -29,6 +29,7 @@ type GraphCMS struct {
 	SpecialCases 	map[string]string
 	Debug			bool
 	Exceptions		map[string]string
+	RenderData		GraphResponse
 }
 
 // AssetNode simple content struct

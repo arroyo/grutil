@@ -1,2 +1,6 @@
-{{ json "Hello world" }}
-{{ oddOrEven "john" }}
+{
+    {{ . }}
+    {{ .Data }}
+}
+{{ json .Data }}
+{{ title "test this title function" }}

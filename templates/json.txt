@@ -1,6 +1,1 @@
-{
-    {{ . }}
-    {{ .Data }}
-}
-{{ json "Hello world" }}
-{{ oddOrEven "john" }}
+{{ json .Data }}
