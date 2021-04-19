@@ -20,7 +20,7 @@ var renderCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-		gcms.RenderTemplate(query, template, filename)
+		gcms.RenderTemplate(query, template, outputFilename)
 	},
 }
 
@@ -33,9 +33,9 @@ func init() {
 	// and all subcommands
 	renderCmd.Flags().StringVarP(&query, "query", "q", "", "GraphQL query to pull data from CMS")
 	renderCmd.Flags().StringVarP(&template, "template", "t", "", "Template to render the content against")
-	renderCmd.Flags().StringVarP(&filename, "filename", "f", "", "Filename of the output")
+	renderCmd.Flags().StringVarP(&outputFilename, "output-filename", "o", "", "Filename of the output file")
 
 	renderCmd.MarkFlagRequired("query")
 	renderCmd.MarkFlagRequired("template")
-	renderCmd.MarkFlagRequired("filename")
+	renderCmd.MarkFlagRequired("output-filename")
 }
