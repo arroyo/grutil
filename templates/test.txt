@@ -1,0 +1,2 @@
+{{ json "Hello world" }}
+{{ oddOrEven "john" }}
