@@ -23,7 +23,7 @@ var versionCmd = &cobra.Command{
 		fmt.Println(`
 {
 	"version": "v0.3.4"
-	"date": "2021-04-16 00:36:47 -0800"
+	"date": "2021-04-21 18:36:47 -0800"
 }
 		`)
 	},
