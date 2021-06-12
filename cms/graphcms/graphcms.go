@@ -19,17 +19,17 @@ import (
 
 // GraphCMS struct
 type GraphCMS struct {
-	url       		interface{}
-	key       		interface{}
-	path      		string
-	folder    		string
-	structure 		map[string]string
-	stage     		string
-	NodeTypes 		[]string
-	SpecialCases 	map[string]string
-	Debug			bool
-	Exceptions		map[string]string
-	RenderData		GraphResponse
+	url          interface{}
+	key          interface{}
+	path         string
+	folder       string
+	structure    map[string]string
+	stage        string
+	NodeTypes    []string
+	SpecialCases map[string]string
+	Debug        bool
+	Exceptions   map[string]string
+	RenderData   GraphResponse
 }
 
 // AssetNode simple content struct
@@ -37,7 +37,7 @@ type AssetNode struct {
 	TypeName string `json:"__typename"`
 	ID       string `json:"id"`
 	Handle   string `json:"handle"`
-	URL 	 string `json:"url"`
+	URL      string `json:"url"`
 }
 
 // Init initialize config
@@ -46,9 +46,9 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 	g.key = key
 	g.path = fmt.Sprintf("%v", path)
 	g.stage = fmt.Sprintf("%v", stage)
-	g.SpecialCases = map[string]string {
+	g.SpecialCases = map[string]string{
 		"RichText": "%v { raw html markdown text }\n",
-		"Asset": "%v { id }\n",
+		"Asset":    "%v { id }\n",
 	}
 	g.Debug = false
 	g.Exceptions = viper.GetStringMapString("exceptions.plurals")
@@ -57,11 +57,16 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 	}
 }
 
+// Set the debug flag
+func (g *GraphCMS) SetDebug(debug bool) {
+	g.Debug = debug
+}
+
 // GetNodes from the cms
 func (g *GraphCMS) GetNodes() map[string]interface{} {
 	// Get Node Types, loop through each type and then pull all content
 	g.NodeTypes = g.GetNodeTypes()
-	allNodes := make( map[string]interface{} )
+	allNodes := make(map[string]interface{})
 
 	for index := range g.NodeTypes {
 		log.Printf("Get %v nodes", g.NodeTypes[index])
@@ -103,11 +108,11 @@ func (g *GraphCMS) IsNodeType(name string) bool {
 // IsSpecialCase field type
 func (g *GraphCMS) IsSpecialCase(name string) bool {
 	for key := range g.SpecialCases {
-        if key == name {
-            return true
-        }
+		if key == name {
+			return true
+		}
 	}
-	
+
 	return false
 }
 
@@ -172,16 +177,16 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 		// Is it one of our custom node types
 		if g.IsNodeType(nodeFields.Type.Fields[index].Type.Name) {
 			fieldsQuery += nodeFields.Type.Fields[index].Name + " { id }\n"
-		
-		// Is it a union field?
+
+			// Is it a union field?
 		} else if nodeFields.Type.Fields[index].Type.Kind == "UNION" {
 			fields := ""
 			for i := range nodeFields.Type.Fields[index].Type.PossibleTypes {
 				fields += fmt.Sprintf("... on %v { id }\n", nodeFields.Type.Fields[index].Type.PossibleTypes[i].Name)
 			}
 			fieldsQuery += fmt.Sprintf("%v { %v } \n", nodeFields.Type.Fields[index].Name, fields)
-		
-		// Do we have fields defined?
+
+			// Do we have fields defined?
 		} else if len(nodeFields.Type.Fields[index].Type.Fields) > 0 {
 			fields := ""
 			for _, field := range nodeFields.Type.Fields[index].Type.Fields {
@@ -189,15 +194,15 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 			}
 			fieldsQuery += fmt.Sprintf("%v { %v } \n", nodeFields.Type.Fields[index].Name, fields)
 
-		// Is it in our special case map?
+			// Is it in our special case map?
 		} else if g.IsSpecialCase(nodeFields.Type.Fields[index].Type.OfType.Name) {
 			fieldsQuery += fmt.Sprintf(g.SpecialCases[nodeFields.Type.Fields[index].Type.OfType.Name], nodeFields.Type.Fields[index].Name)
-		
-		// Do we still need this?
+
+			// Do we still need this?
 		} else if len(nodeFields.Type.Fields[index].Args) > 1 {
 			fieldsQuery += fmt.Sprintf("%v { id } \n", nodeFields.Type.Fields[index].Name)
-		
-		// Default
+
+			// Default
 		} else {
 			fieldsQuery += nodeFields.Type.Fields[index].Name + "\n"
 		}
@@ -205,10 +210,6 @@ func (g *GraphCMS) GetAllNodesByType(name string) map[string]interface{} {
 
 	nodes := g.Pluralize(name)
 	query = fmt.Sprintf(query, nodes, fieldsQuery)
-	if g.Debug {
-		log.Printf("node query: %v \n", query)
-	}
-
 	allNodes, err := g.CallGraphAPI(query, "{}")
 
 	if err != nil {
@@ -299,15 +300,15 @@ type NodeFields struct {
 				DefaultValue string `json:"defaultValue"`
 			} `json:"args"`
 			Type struct {
-				Name        string         `json:"name"`
-				Kind        string         `json:"kind"`
-				Description string         `json:"description"`
-				Fields      []NodeSubfield `json:"fields"`
+				Name          string         `json:"name"`
+				Kind          string         `json:"kind"`
+				Description   string         `json:"description"`
+				Fields        []NodeSubfield `json:"fields"`
 				PossibleTypes []struct {
 					Name        string `json:"name"`
 					Description string `json:"description"`
 				} `json:"possibleTypes"`
-				OfType      struct {
+				OfType struct {
 					Name        string `json:"name"`
 					Description string `json:"description"`
 				} `json:"ofType"`
@@ -436,7 +437,7 @@ func (g *GraphCMS) GetSchemaQuery(name string) (string, string) {
 // GetSchemas retrives the schema and returns json
 func (g *GraphCMS) GetSchemas() map[string]interface{} {
 	g.NodeTypes = g.GetNodeTypes()
-	schemas := make( map[string]interface{} )
+	schemas := make(map[string]interface{})
 	var nodeType string
 	var err error
 
@@ -527,7 +528,7 @@ func (g *GraphCMS) GetAllEnumerations() []interface{} {
 
 // GetEnumerations from the CMS based on enumerations defined in your config
 func (g *GraphCMS) GetEnumerations() map[string]interface{} {
-	enums := make( map[string]interface{} )
+	enums := make(map[string]interface{})
 	enumConfig := viper.GetStringSlice("backups.enumerations")
 
 	for _, name := range enumConfig {

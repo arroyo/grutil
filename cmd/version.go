@@ -22,8 +22,8 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(`
 {
-	"version": "v0.3.4"
-	"date": "2021-04-21 18:36:47 -0800"
+	"version": "v0.3.5"
+	"date": "2021-06-12 01:10:47 -0800"
 }
 		`)
 	},

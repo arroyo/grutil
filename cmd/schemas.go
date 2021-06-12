@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,6 +41,7 @@ func init() {
 func schemas(args []string) {
 	var gcms graphcms.GraphCMS
 	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+	gcms.SetDebug(debug)
 	err := gcms.DownloadSchemas()
 
 	if err != nil {

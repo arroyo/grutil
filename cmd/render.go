@@ -20,6 +20,7 @@ var renderCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+		gcms.SetDebug(debug)
 		gcms.RenderTemplate(query, template, outputFilename)
 	},
 }

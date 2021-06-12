@@ -52,14 +52,19 @@ func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphR
 	}
 	defer resp.Body.Close()
 
-	// Check status
-	if resp.StatusCode != 200 {
-		log.Fatalf("GraphCMS server error: %v", resp.Status)
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	// Check status
+	if resp.StatusCode != 200 {
+		log.Fatalf("GraphCMS server error: %v", resp.Status)
+		// Write debug data to log output
+		if g.Debug {
+			log.Printf("Failed API query: %v", requestQuery)
+			log.Printf("Failed API response body: %v", body)
+		}
 	}
 
 	// Process the response
@@ -69,12 +74,18 @@ func (g *GraphCMS) CallGraphAPI(requestQuery string, requestVars string) (GraphR
 		if len(apiResp.Data) > 0 {
 			// data is sometimes returned even if there is an error. GraphCMS edge case / quirk.
 			if g.Debug {
-				log.Printf("response: %v", requestQuery)
-				log.Printf("response: %v", apiResp)
+				log.Printf("API query: %v", requestQuery)
+				log.Printf("API response: %v", apiResp)
 			}
 		} else {
 			log.Fatalf("GraphCMS API returned an error: %v", apiResp.Errors[0].Message)
 		}
+	}
+
+	// Write debug data to log output
+	if g.Debug {
+		log.Printf("API query: %v", requestQuery)
+		log.Printf("API response: %v", apiResp)
 	}
 
 	return apiResp, err

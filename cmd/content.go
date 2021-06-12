@@ -17,12 +17,13 @@ import (
 var contentCmd = &cobra.Command{
 	Use:   "content",
 	Short: "Download all content, including assets",
-	Long: `Download all content and assets, grouped by schema type.`,
+	Long:  `Download all content and assets, grouped by schema type.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Download content")
 
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
+		gcms.SetDebug(debug)
 		gcms.DownloadContent()
 	},
 }

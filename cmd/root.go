@@ -16,7 +16,7 @@ import (
 )
 
 var cfgFile, path, developer, directory, schema, query, template, outputFilename string
-var verbose bool
+var verbose, debug bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -59,6 +59,7 @@ func init() {
 	// will be global for your application.
 	// rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Specify directory to save file")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Set to true to turn on extended output")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Set to true to turn on debug output")
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Change path pointing to where config file is stored. (default $HOME/.cmsutil/config.yaml)")
 }
 
@@ -87,7 +88,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		if verbose {
 			fmt.Println("Using config file:", viper.ConfigFileUsed())
-		}	
+		}
 	}
 
 	viper.SetDefault("backups.schemapath", home+"/.cmsutil/backups/schema")
