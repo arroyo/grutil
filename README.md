@@ -4,7 +4,12 @@ Headless CMS CLI Utility
 
 Please log any issues to Github issues.
 
-The current version works with [GraphCMS](https://graphcms.com/) and backs up your project to disk, including asset files.
+The current version works with [GraphCMS](https://graphcms.com/) and downloads schemas, content, backs up your project to disk (including asset files) and performs simple rendering.
+
+**Functions**
+* Download
+* Backup
+* Render
 
 ## Install
 
@@ -34,12 +39,14 @@ CMS_API_KEY
 
 ## Usage
 
-Get a copy of your schema or content with the download command. Backup your entire project with the backup command.
+Get a copy of your schema or content with the download command. Backup your entire project with the backup command.  Render a GraphQL query against a template.
+
+You can add optional --verbose and --debug flags to any command.  Verbose will add more details of what is happening as the program runs.  Debug is useful if you are having issues and want to see what API calls are happening behind the scenes.  Debug will show the GraphQL query being made and the API response body.
 
 ### Download schema models and enumerations
 
 ```shell-script
-cmsutil download schemas
+cmsutil download schemas --verbose
 ```
 
 ### Download node content and assets
@@ -56,9 +63,17 @@ download both schemas and content into a timestamped folder
 cmsutil backup
 ```
 
-### Help
+### Render content
 
-Get general help or help with a specific command using.
+Query content with GraphQL and render it against a go template.
+
+```shell-script
+cmsutil render --template json.txt --query "query MyQuery { faq(where: {id: \"cknmrjsvw7yd\"}) { id title publishedAt updatedAt } }"
+```
+
+### Get help
+
+Get general help or specific help with a command using.
 
 ```shell-script
 cmsutil help

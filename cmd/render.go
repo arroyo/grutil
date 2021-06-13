@@ -1,7 +1,7 @@
 /*
 Package cmd download
 
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 */
 
 package cmd
@@ -20,7 +20,7 @@ var renderCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-		gcms.SetDebug(debug)
+		gcms.SetFlags(debug, verbose)
 		gcms.RenderTemplate(query, template, outputFilename)
 	},
 }

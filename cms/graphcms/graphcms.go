@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 
 cms graphcms package
 
@@ -28,6 +28,7 @@ type GraphCMS struct {
 	NodeTypes    []string
 	SpecialCases map[string]string
 	Debug        bool
+	Verbose      bool
 	Exceptions   map[string]string
 	RenderData   GraphResponse
 }
@@ -51,15 +52,17 @@ func (g *GraphCMS) Init(url interface{}, key interface{}, stage interface{}, pat
 		"Asset":    "%v { id }\n",
 	}
 	g.Debug = false
+	g.Verbose = false
 	g.Exceptions = viper.GetStringMapString("exceptions.plurals")
 	if g.Debug {
 		log.Println(g.Exceptions)
 	}
 }
 
-// Set the debug flag
-func (g *GraphCMS) SetDebug(debug bool) {
+// Set the debug and verbose flags
+func (g *GraphCMS) SetFlags(debug bool, verbose bool) {
 	g.Debug = debug
+	g.Verbose = verbose
 }
 
 // GetNodes from the cms
@@ -69,7 +72,9 @@ func (g *GraphCMS) GetNodes() map[string]interface{} {
 	allNodes := make(map[string]interface{})
 
 	for index := range g.NodeTypes {
-		log.Printf("Get %v nodes", g.NodeTypes[index])
+		if g.Verbose {
+			log.Printf("Get %v nodes", g.NodeTypes[index])
+		}
 		allNodes[g.NodeTypes[index]] = g.GetAllNodesByType(g.NodeTypes[index])
 	}
 
@@ -441,11 +446,15 @@ func (g *GraphCMS) GetSchemas() map[string]interface{} {
 	var nodeType string
 	var err error
 
-	fmt.Printf("NodeTypes: %v\n", g.NodeTypes)
+	if g.Verbose {
+		log.Printf("Schemas to download: %v\n", g.NodeTypes)
+	}
 
 	for index := range g.NodeTypes {
 		nodeType = g.NodeTypes[index]
-		log.Printf("Get %v schema json", nodeType)
+		if g.Verbose {
+			log.Printf("Get %v schema json", nodeType)
+		}
 		schemas[nodeType], err = g.GetSchema(nodeType)
 		if err != nil {
 			log.Printf("error getting %v schema", nodeType)

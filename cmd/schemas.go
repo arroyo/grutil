@@ -1,7 +1,7 @@
 /*
 Package cmd download schemas
 
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 */
 package cmd
 
@@ -41,7 +41,7 @@ func init() {
 func schemas(args []string) {
 	var gcms graphcms.GraphCMS
 	gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-	gcms.SetDebug(debug)
+	gcms.SetFlags(debug, verbose)
 	err := gcms.DownloadSchemas()
 
 	if err != nil {

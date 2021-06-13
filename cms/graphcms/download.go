@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 
 cms graphcms package: download
 
@@ -20,7 +20,7 @@ import (
 // WriteFileJSON write json struct to a file
 func (g *GraphCMS) WriteFileJSON(data map[string]interface{}, folder string, filename string) {
 	var file storage.File
-	file.Init(g.path, folder, filename)
+	file.Init(g.path, folder, filename, g.Verbose)
 	file.WriteFileJSON(data)
 
 	return
@@ -67,11 +67,11 @@ func (g *GraphCMS) DownloadEnumerations() error {
 func (g *GraphCMS) DownloadAssets(data map[string]interface{}) {
 	var node AssetNode
 	var file storage.File
-	file.Init(g.path, g.folder, "")
+	file.Init(g.path, g.folder, "", g.Verbose)
 
 	// Loop through nodes, find assets and download them
-	for index := range data["nodes"].( []interface{} ) {
-		byteData, _ := json.Marshal(data["nodes"].( []interface{} )[index])
+	for index := range data["nodes"].([]interface{}) {
+		byteData, _ := json.Marshal(data["nodes"].([]interface{})[index])
 		err := json.Unmarshal(byteData, &node)
 		if err != nil {
 			panic(err)
@@ -95,7 +95,7 @@ func (g *GraphCMS) DownloadContent() {
 
 	// Download all assets into the assets folder
 	g.folder = fmt.Sprintf("/%v/content/assets", g.stage)
-	g.DownloadAssets( data["Asset"].(map[string]interface{}) )
+	g.DownloadAssets(data["Asset"].(map[string]interface{}))
 
 	/* Get lists from GraphCMS and write to file */
 	// data = g.GetListsV1()

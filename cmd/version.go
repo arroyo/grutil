@@ -1,7 +1,7 @@
 /*
 Package cmd download
 
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 */
 
 package cmd
@@ -22,8 +22,8 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(`
 {
-	"version": "v0.3.5"
-	"date": "2021-06-12 01:10:47 -0800"
+	"version": "v0.3.6"
+	"date": "2021-06-12 16:00:00 -0800"
 }
 		`)
 	},

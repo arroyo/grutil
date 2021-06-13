@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 
 cms graphcms package: utilities
 
@@ -40,24 +40,24 @@ func (g *GraphCMS) Pluralize(name string) string {
 	if lastChar == "y" {
 		plural = fmt.Sprintf("%sies", nameTransform[0:len(nameTransform)-1])
 
-	// If a word ends in ‑s, ‑x, -z or ‑o add 'es'
+		// If a word ends in ‑s, ‑x, -z or ‑o add 'es'
 	} else if lastChar == "s" || lastChar == "x" || lastChar == "z" || lastChar == "o" {
 		plural = fmt.Sprintf("%ses", nameTransform)
-	
-	// For almost all other nouns, simply add 's' to pluralize
+
+		// For almost all other nouns, simply add 's' to pluralize
 	} else {
 		plural = fmt.Sprintf("%ss", g.lcFirst(name))
 	}
-	
+
 	// @todo If a word ends in ‑sh or ‑ch you add 'es'
-	
+
 	return plural
 }
 
 // lcFirst make the first character lowercase
-func (g *GraphCMS) lcFirst(str string) string {  
-	for i, v := range str {  
-		return string(unicode.ToLower(v)) + str[i+1:]  
+func (g *GraphCMS) lcFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToLower(v)) + str[i+1:]
 	}
 	return ""
 }

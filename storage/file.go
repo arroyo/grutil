@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 
 storage File package
 
@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
@@ -22,13 +23,15 @@ type File struct {
 	Path     string
 	Folder   string
 	Filename string
+	Verbose  bool
 }
 
 // Init initialize File
-func (f *File) Init(path string, folder string, filename string) {
+func (f *File) Init(path string, folder string, filename string, verbose bool) {
 	f.Path = path
 	f.Folder = folder
 	f.Filename = filename
+	f.Verbose = verbose
 }
 
 func checkErr(e error) {
@@ -54,7 +57,6 @@ func (f *File) WriteFileJSON(data map[string]interface{}) {
 	var fullpath = fmt.Sprintf("%v%v", f.Path, f.Folder)
 	var filepath = fmt.Sprintf("%v/%v", fullpath, f.Filename)
 
-	fmt.Println("Write file: " + filepath)
 	fileData, err := json.MarshalIndent(data, "", " ")
 	checkErr(err)
 
@@ -65,6 +67,10 @@ func (f *File) WriteFileJSON(data map[string]interface{}) {
 
 	err = ioutil.WriteFile(filepath, fileData, 0644)
 	checkErr(err)
+
+	if f.Verbose {
+		log.Println("Write file: " + filepath)
+	}
 
 	file.Sync()
 	file.Close()
@@ -94,7 +100,9 @@ func (f *File) WriteFile(data string) {
 
 // DownloadFile from URL
 func (f *File) DownloadFile(url string, filename string) error {
-	fmt.Println("Download file " + url)
+	if f.Verbose {
+		log.Println("Download file " + url)
+	}
 
 	resp, err := http.Get(url)
 	if err != nil {

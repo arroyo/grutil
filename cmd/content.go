@@ -1,13 +1,11 @@
 /*
 Package cmd download content
 
-Copyright © 2020 John Arroyo
+Copyright © 2021 John Arroyo
 */
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/arroyo/cmsutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,11 +17,9 @@ var contentCmd = &cobra.Command{
 	Short: "Download all content, including assets",
 	Long:  `Download all content and assets, grouped by schema type.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Download content")
-
 		var gcms graphcms.GraphCMS
 		gcms.Init(viper.Get("CMS_API_URL"), viper.Get("CMS_API_KEY"), viper.Get("backups.stage"), viper.Get("backups.path"))
-		gcms.SetDebug(debug)
+		gcms.SetFlags(debug, verbose)
 		gcms.DownloadContent()
 	},
 }
