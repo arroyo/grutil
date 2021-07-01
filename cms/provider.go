@@ -1,7 +1,7 @@
 /*
 Copyright © 2021 John Arroyo
 
-CMS Provider interface
+GraphQL CMS Provider interface
 
 All CMS implementations should implement this interface.
 */

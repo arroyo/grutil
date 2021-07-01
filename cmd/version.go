@@ -17,8 +17,8 @@ import (
 // run version.sh and paste the results below
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Display the current version of the cmsutil CLI",
-	Long:  `Display the current version of the cmsutil CLI`,
+	Short: "Display the current version of the grutil CLI",
+	Long:  `Display the current version of the grutil CLI`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(`
 {

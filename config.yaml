@@ -4,7 +4,7 @@ cms:
     provider: graphcms.GraphCMS
 
 backups:
-    path: /Users/arroyo/.cmsutil/backups
+    path: /Users/arroyo/.grutil/backups
     stage: "master"
     enumerations:
         - Category

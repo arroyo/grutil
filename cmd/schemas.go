@@ -8,7 +8,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/arroyo/cmsutil/cms/graphcms"
+	"github.com/arroyo/grutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

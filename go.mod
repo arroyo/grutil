@@ -1,4 +1,4 @@
-module github.com/arroyo/cmsutil
+module github.com/arroyo/grutil
 
 go 1.13
 

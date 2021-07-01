@@ -3,6 +3,7 @@ env.sh
 github.com/
 golang.org/
 gopkg.in/
+debug/
 temp/
 
 # Binaries for programs and plugins

@@ -1,10 +1,10 @@
-# cmsutil
+# Grutil
 
-Headless CMS CLI Utility
+A helpful GraphQL utility
 
 Please log any issues to Github issues.
 
-The current version works with [GraphCMS](https://graphcms.com/) and downloads schemas, content, backs up your project to disk (including asset files) and performs simple rendering.
+The current version works with [GraphCMS](https://graphcms.com/) and downloads schemas, content, backs up your project to disk (including asset files) and allows simple rendering.
 
 **Functions**
 * Download
@@ -13,15 +13,15 @@ The current version works with [GraphCMS](https://graphcms.com/) and downloads s
 
 ## Install
 
-Once you have [Go installed](https://golang.org/doc/install) on your target environment, to install cmsutil run
+Once you have [Go installed](https://golang.org/doc/install) on your target environment, simply run the following to install
 
 ```
-go get github.com/arroyo/cmsutil
+go get github.com/arroyo/grutil
 ```
 
 ## Config
 
-In your home directory create a folder called ".cmsutil" and put a text file called "config.yaml" in it.
+In your home directory create a folder called ".grutil" and put a text file called "config.yaml" in it.
 
 There is an example config file in the repo.  
 
@@ -46,13 +46,13 @@ You can add optional --verbose and --debug flags to any command.  Verbose will a
 ### Download schema models and enumerations
 
 ```shell-script
-cmsutil download schemas --verbose
+grutil download schemas --verbose
 ```
 
 ### Download node content and assets
 
 ```shell-script
-cmsutil download content
+grutil download content
 ```
 
 ### Backup your site
@@ -60,7 +60,7 @@ cmsutil download content
 download both schemas and content into a timestamped folder
 
 ```shell-script
-cmsutil backup
+grutil backup
 ```
 
 ### Render content
@@ -68,7 +68,7 @@ cmsutil backup
 Query content with GraphQL and render it against a go template.
 
 ```shell-script
-cmsutil render --template json.txt --query "query MyQuery { faq(where: {id: \"cknmrjsvw7yd\"}) { id title publishedAt updatedAt } }"
+grutil render --template json.txt --query "query MyQuery { faq(where: {id: \"cknmrjsvw7yd\"}) { id title publishedAt updatedAt } }"
 ```
 
 ### Get help
@@ -76,7 +76,7 @@ cmsutil render --template json.txt --query "query MyQuery { faq(where: {id: \"ck
 Get general help or specific help with a command using.
 
 ```shell-script
-cmsutil help
-cmsutil download -h
-cmsutil backup -h
+grutil help
+grutil download -h
+grutil backup -h
 ```

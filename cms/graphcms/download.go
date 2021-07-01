@@ -14,7 +14,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/arroyo/cmsutil/storage"
+	"github.com/arroyo/grutil/storage"
 )
 
 // WriteFileJSON write json struct to a file

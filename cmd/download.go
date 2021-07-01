@@ -15,12 +15,12 @@ import (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download schemas or content and assets. For additional help run: cmsutil download -h",
+	Short: "Download schemas or content and assets. For additional help run: grutil download -h",
 	Long: `There are two download options.
-	cmsutil download content
-	cmsutil download schemas`,
+	grutil download content
+	grutil download schemas`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Missing download option, for more help type, cmsutil download -h")
+		fmt.Println("Missing download option, for more help type, grutil download -h")
 	},
 }
 

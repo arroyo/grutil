@@ -20,7 +20,7 @@ var verbose, debug bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cmsutil",
+	Use:   "grutil",
 	Short: "CMS Utility",
 	Long:  `A headless CMS utility for interacting with a CMS API for simple tasks like download, backup, & render`,
 }
@@ -60,7 +60,7 @@ func init() {
 	// rootCmd.PersistentFlags().StringVarP(&directory, "directory", "d", "", "Specify directory to save file")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Set to true to turn on extended output")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Set to true to turn on debug output")
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Change path pointing to where config file is stored. (default $HOME/.cmsutil/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Change path pointing to where config file is stored. (default $HOME/.grutil/config.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -77,12 +77,12 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Search config in home directory with name ".helloworld" (without extension).
-		viper.AddConfigPath(home + "/.cmsutil")
+		viper.AddConfigPath(home + "/.grutil")
 		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-	// viper.SetEnvPrefix("CMSUTIL")
+	// viper.SetEnvPrefix("grutil")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
@@ -91,8 +91,8 @@ func initConfig() {
 		}
 	}
 
-	viper.SetDefault("backups.schemapath", home+"/.cmsutil/backups/schema")
-	viper.SetDefault("backups.contentpath", home+"/.cmsutil/backups/content")
+	viper.SetDefault("backups.schemapath", home+"/.grutil/backups/schema")
+	viper.SetDefault("backups.contentpath", home+"/.grutil/backups/content")
 	// viper.Set("cms.host", "set override in code") // Example override
 
 	// Validate API URL

@@ -6,7 +6,7 @@ Copyright © 2021 John Arroyo
 package cmd
 
 import (
-	"github.com/arroyo/cmsutil/cms/graphcms"
+	"github.com/arroyo/grutil/cms/graphcms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
