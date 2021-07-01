@@ -11,6 +11,8 @@ The current version works with [GraphCMS](https://graphcms.com/) and downloads s
 * Backup
 * Render
 
+@note this project was originally called cmsutil.  It was later changed to avoid namespace collisions in some linux environments as there is a cryptography packaged called cmsutil.  If you are currently running the old cmsutil please delete and reintsall grutil in its place.
+
 ## Install
 
 Once you have [Go installed](https://golang.org/doc/install) on your target environment, simply run the following to install

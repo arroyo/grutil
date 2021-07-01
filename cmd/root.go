@@ -21,8 +21,8 @@ var verbose, debug bool
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "grutil",
-	Short: "CMS Utility",
-	Long:  `A headless CMS utility for interacting with a CMS API for simple tasks like download, backup, & render`,
+	Short: "A helpful GraphQL utility",
+	Long:  `A helpful GraphQL utility for interacting with a GraphQL API for simple tasks like download, backup, & render`,
 }
 
 // Config structure

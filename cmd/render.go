@@ -15,7 +15,7 @@ import (
 // downloadCmd represents the download command
 var renderCmd = &cobra.Command{
 	Use:   "render",
-	Short: "Render CMS content as file(s) using a template",
+	Short: "Render GraphQL content using a template",
 	Long:  `Render the queried content nodes against a template`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var gcms graphcms.GraphCMS
