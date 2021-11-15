@@ -1,13 +1,14 @@
-version: 3.8
+version: '3.8'
 
 services:
     cli:
-        name: grutil
-        # image: arroyo/grutil
+        container_name: mygrutil
         build:
             context: ./docker
         environment:
             CMS_API_URL:
             CMS_API_KEY:
         entrypoint: 
-            - '/bin/ash'
+            - 'tail'
+            - '-f'
+            - '/dev/null'
