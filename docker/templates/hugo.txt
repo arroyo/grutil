@@ -1,0 +1,12 @@
+---
+title: {{ index .Data.title }}
+author: {{ index .Data.author.name }}
+type: post
+date: {{ index .Data.date }}
+url: {{ index .Data.slug }}
+featured_image: {{ index .Data.featuredImage.url }}
+categories: {{ index .Data.categories }}
+tags: {{ index .Data.tags }}
+
+---
+{{ index .Data.bodyRich.html }}
