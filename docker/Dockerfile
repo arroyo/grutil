@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:1.21.4-alpine3.18
 
 LABEL maintainer "John Arroyo <john.arroyo@gmail.com>"
 
